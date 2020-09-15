@@ -6,6 +6,8 @@ const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const util = require("util");
 const SECRET_KEY = process.env.SECRET_KEY;
 
+//ade
+
 module.exports = {
   getUserData: async (req, res) => {
     const getAllUsers = "SELECT * FROM users";
