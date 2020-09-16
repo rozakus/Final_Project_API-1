@@ -3,7 +3,6 @@ const { validationResult } = require("express-validator");
 const { createToken } = require("../helpers/jwt");
 const db = require("../database");
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
-const util = require("util");
 const SECRET_KEY = process.env.SECRET_KEY;
 
 module.exports = {
