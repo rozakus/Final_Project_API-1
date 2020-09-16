@@ -1,5 +1,5 @@
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
-
+// rozak
 module.exports = {
   getAllProducts: async (req, res) => {
     const query = "SELECT * FROM products";
