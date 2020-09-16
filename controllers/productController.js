@@ -29,14 +29,14 @@ module.exports = {
       FROM package p
       JOIN package_details pd ON p.id_product_package = pd.package_id
       LEFT JOIN products pr ON pd.category_id = pr.product_cate`
-      try {
-          const result = await asyncQuery(query)
-          res.status(200).send(result)
-      } catch(err) {
-          console.log(err)
-          res.status(500).send(err)
-      }
-  },
+        try {
+            const result = await asyncQuery(query)
+            res.status(200).send(result)
+        } catch (err) {
+            console.log(err)
+            res.status(5000).send(err)
+        }
+    },
   getPackageById: async (req, res) => {
       const { id } = req.params
       const query = `SELECT p.id_product_package, p. package_name, p.description, 
@@ -46,12 +46,12 @@ module.exports = {
       JOIN package_details pd ON p.id_product_package = pd.package_id
       LEFT JOIN products pr ON pd.category_id = pr.product_cate
       WHERE id_product_package = ${id}`
-      try {
-          const result = await asyncQuery(query)
-          res.status(200).send(result)
-      } catch(err) {
-          console.log(err)
-          res.status(500).send(err)
-      }
-  }
+        try {
+            const result = await asyncQuery(query)
+            res.status(200).send(result)
+        } catch (err) {
+            console.log(err)
+            res.status(500).send(err)
+        }
+    }
 };
