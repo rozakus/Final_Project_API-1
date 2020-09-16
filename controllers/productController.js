@@ -36,6 +36,17 @@ module.exports = {
     getDetailPackage: async (req, res) => {
         const { id } = req.params
         const query = `SELECT p.id_product_package, p. package_name, p.description, 
+      try {
+          const result = await asyncQuery(query)
+          res.status(200).send(result)
+      } catch(err) {
+          console.log(err)
+          res.status(500).send(err)
+      }
+  },
+  getDetailPackage: async (req, res) => {
+      const { id } = req.params
+      const query = `SELECT p.id_product_package, p. package_name, p.description, 
       pd.category_id, pd.max_qty, 
       pr.id_product, pr.product_name, pr.price_modal, pr.product_stock, p.package_price
       FROM package p
