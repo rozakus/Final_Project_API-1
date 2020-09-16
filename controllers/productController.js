@@ -30,7 +30,7 @@ module.exports = {
           res.status(200).send(result)
       } catch(err) {
           console.log(err)
-          res.status(5000).send(err)
+          res.status(500).send(err)
       }
   },
   getDetailPackage: async (req, res) => {
