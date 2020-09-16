@@ -1,4 +1,8 @@
 const userController = require('./userController');
-// test rozak
+const productController = require('./productController')
+
 //export all controllers
-module.exports = { userController }
+module.exports = {
+    userController,
+    productController
+}
