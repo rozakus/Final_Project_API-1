@@ -6,8 +6,6 @@ const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const util = require("util");
 const SECRET_KEY = process.env.SECRET_KEY;
 
-//ade
-
 module.exports = {
   getUserData: async (req, res) => {
     const getAllUsers = "SELECT * FROM users";
@@ -46,13 +44,13 @@ module.exports = {
       // encrypt password before insert into database
       const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
       const insertUser = `INSERT INTO users (username, email, password, role, status)
-                            values ('${username}', '${email}', '${hashpass.toString()}', 'user', 0)`;
+                            values ('${username}', '${email}', '${hashpass.toString()}', 'user', 1)`;
       const resultQuery = await asyncQuery(insertUser);
 
       //prepare user's record data
       req.body.password = resultQuery;
       req.body.role = "user";
-      req.body.status = 0;
+      req.body.status = 1;
 
       //add user record to database
       const addUser = `INSERT INTO users SET ?`;
@@ -75,18 +73,18 @@ module.exports = {
     const { username, password } = req.body;
     console.log(req.body);
     try {
-      const getDataUsername = `SELECT * FROM users WHERE username = '${username}'`;
+      const getDataUsername = `SELECT * FROM users WHERE username = '${username}' or email = '${email}'`;
       const resultUsername = await asyncQuery(getDataUsername);
 
       //if username doesn't exist
       if (resultUsername.length === 0) {
-        return res.status(400).send(`Username not found`);
+        return res.status(400).send(`Username or Email not found`);
       }
 
       //check password: password from user vs password from database
       const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
       if (hashpass.toString() !== resultUsername[0].password) {
-        return res.status(400).send(`invalid password !`);
+        return res.status(400).send(`Invalid password !`);
       }
 
       //filter user's data

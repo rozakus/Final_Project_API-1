@@ -12,14 +12,14 @@ app.use(bodyParser.json());
 app.use(cors());
 
 //connect database
-// const db = require('./database')
-// db.connect((err) => {
-//     if (err) {
-//         console.log('error connecting : ' + err);
-//         return;
-//     }
-//     console.log(`database is connected at ID : ${db.threadId}`)
-// })
+const db = require('./database')
+db.connect((err) => {
+    if (err) {
+        console.log('error connecting : ' + err);
+        return;
+    }
+    console.log(`database is connected at ID : ${db.threadId}`)
+})
 
 //home route
 app.get('/', (req, res) => {
@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 
 //apply router
 const { userRouter } = require('./routers')
-app.use('/api', userRouter)
+app.use('', userRouter)
 
 // bind or host in localhost
 const PORT = process.env.PORT
