@@ -1,36 +1,47 @@
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 
 module.exports = {
-  getAllProducts: async (req, res) => {
-    const query = "SELECT * FROM products";
-    try {
-      const result = await asyncQuery(query);
-      res.status(200).send(result);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send(error);
-    }
-  },
-  getDetailProduct: async (req, res) => {
-      const { id } = req.params
-      const query = `SELECT * FROM products WHERE id_product = ${id}`
-      try {
-          const result = await asyncQuery(query)
-          res.status(200).send(result)
-      } catch (err) {
-          console.log(err)
-          res.status(500).send(err)
-      }
-  },
-  getAllPackages: async (req, res) => {
-      const query = `select * from package p
+    getAllProducts: async (req, res) => {
+        const query = "SELECT * FROM products";
+        try {
+            const result = await asyncQuery(query);
+            res.status(200).send(result);
+        } catch (error) {
+            console.log(error);
+            res.status(500).send(error);
+        }
+    },
+    getDetailProduct: async (req, res) => {
+        const { id } = req.params
+        const query = `SELECT * FROM products WHERE id_product = ${id}`
+        try {
+            const result = await asyncQuery(query)
+            res.status(200).send(result)
+        } catch (err) {
+            console.log(err)
+            res.status(500).send(err)
+        }
+    },
+    getAllPackages: async (req, res) => {
+        const query = `select * from package p
       join package_details pd on p.id_product_package = pd.package_id`
+        try {
+            const result = await asyncQuery(query)
+            res.status(200).send(result)
+        } catch (err) {
+            console.log(err)
+            res.status(5000).send(err)
+        }
+    },
+    getDetailPackage: async (req, res) => {
+        const { id } = req.params
+        const query = `SELECT p.id_product_package, p. package_name, p.description, 
       try {
           const result = await asyncQuery(query)
           res.status(200).send(result)
       } catch(err) {
           console.log(err)
-          res.status(5000).send(err)
+          res.status(500).send(err)
       }
   },
   getDetailPackage: async (req, res) => {
@@ -42,12 +53,12 @@ module.exports = {
       JOIN package_details pd ON p.id_product_package = pd.package_id
       LEFT JOIN products pr ON pd.category_id = pr.product_cate
       WHERE id_product_package = ${id}`
-      try {
-          const result = await asyncQuery(query)
-          res.status(200).send(result)
-      } catch(err) {
-          console.log(err)
-          res.status(500).send(err)
-      }
-  }
+        try {
+            const result = await asyncQuery(query)
+            res.status(200).send(result)
+        } catch (err) {
+            console.log(err)
+            res.status(500).send(err)
+        }
+    }
 };
