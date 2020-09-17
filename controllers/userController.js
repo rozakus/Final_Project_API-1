@@ -1,7 +1,6 @@
 const CryptoJS = require("crypto-js");
 const { validationResult } = require("express-validator");
 const { createToken } = require("../helpers/jwt");
-const db = require("../database");
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -48,6 +47,7 @@ module.exports = {
 
       //prepare user's record data
       req.body.password = resultQuery;
+      console.log(req.body.password)
       req.body.role = "user";
       req.body.status = 1;
 
