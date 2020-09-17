@@ -10,6 +10,7 @@ router.get('/users', userController.getUserData);
 router.post('/register', validator,userController.register);
 router.post('/login', userController.login);
 router.post('/keeplogin', verify, userController.keeplogin);
+router.post('/verification', verify, userController.emailVerification);
 
 //export router
 module.exports = router;

@@ -3,7 +3,7 @@ const { validationResult } = require("express-validator");
 const { createToken } = require("../helpers/jwt");
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const SECRET_KEY = process.env.SECRET_KEY;
-const transporter = require('../helpers/nodemailer')
+const transporter = require("../helpers/nodemailer");
 
 module.exports = {
   getUserData: async (req, res) => {
@@ -28,7 +28,9 @@ module.exports = {
 
       //check password
       if (password !== confpass) {
-        return res.status(400).send(`Password and Confirm Password doesn't match!`);
+        return res
+          .status(400)
+          .send(`Password and Confirm Password doesn't match!`);
       }
 
       //insert new user to database
@@ -46,6 +48,9 @@ module.exports = {
                      values ('${username}', '${email}', '${hashpass.toString()}', 'user', 1)`;
       const result = await asyncQuery(query);
 
+      // insert to profile
+      const queryProfile = `insert into profile (user_id) values(${result.insertId})`
+
       //prepare user's record data
       req.body.id = result.insertId;
       req.body.role = "user";
@@ -58,19 +63,21 @@ module.exports = {
 
       // sent email verification to user
       const option = {
-        from : `admin <frengky.sihombing.777@gmail.com>`,
-        to : ``,
-        subject : 'Email Verification',
-        text : '',
-        html : `
-            <h3>Click link below to verified your account</h3>
-            <a href ="http://localhost:3000/verification?${token}">http://localhost:3000/verification?${token}</a>`
-    }
-    const info = await transporter.sendMail(option)
+        from: `admin <frengky.sihombing.777@gmail.com>`,
+        to: `${email}`,
+        subject: "PurwaHampers Verification",
+        text: `Hello our precious customers, ${username}!
+        
+        Click link below to verified your account
+        
+        Your hamper's best provider,
+        PurwaHampers.`,
+        html: `
+            <a href ="http://localhost:3000/verification?${token}">http://localhost:3000/verification?${token}</a>`,
+      };
+      const info = await transporter.sendMail(option);
 
-    res.status(200).send(info.response)
-
-      res.status(200).send({ ...req.body, token });
+      res.status(200).send(info.response);
     } catch (error) {
       console.log(error);
       return res.status(500).send(error);
@@ -80,7 +87,9 @@ module.exports = {
     const { username, password, email } = req.body;
     console.log(req.body);
     try {
-      const getDataUsername = `SELECT * FROM users WHERE username = '${username}' or email = '${email}'`;
+      const getDataUsername = `SELECT * FROM users u
+                                 join profile p on u.id_users = p.user_id
+                                WHERE username = '${username}' or email = '${email}'`;
       const resultUsername = await asyncQuery(getDataUsername);
 
       //if username doesn't exist
@@ -99,10 +108,10 @@ module.exports = {
 
       //create token
       const token = createToken({
-        id: resultUsername[0].id,
-        username: resultUsername[0].username,
+        id: resultUsername[0].id
       });
       resultUsername[0].token = token;
+
       res.status(200).send(resultUsername[0]);
     } catch (error) {
       console.log(error);
@@ -113,18 +122,34 @@ module.exports = {
     console.log(`user : `, req.user);
     try {
       //query to get user's data
-      const queryKeepLogin = `SELECT user_id, username, email, role FROM users 
-                            WHERE user_id=${req.user.id} AND username='${req.user.username}'`;
-        const resultKeepLogin = await asyncQuery(queryKeepLogin);
-        console.log("resultkeeplogin : ", resultKeepLogin);
+      const queryKeepLogin = `SELECT * FROM users u
+                              join profile p on u.id_users = p.user_id where id_users = ${req.user.id}`;
+      const resultKeepLogin = await asyncQuery(queryKeepLogin);
 
-        //prepare user's data
-        delete resultKeepLogin[0].password;
+      //prepare user's data
+      delete resultKeepLogin[0].password;
 
-        res.status(200).send(resultKeepLogin[0]);
+      res.status(200).send(resultKeepLogin[0]);
     } catch (error) {
       console.log(error);
       return res.status(500).send(error);
+    }
+  },
+  emailVerification: async (req, res) => {
+    try {
+      // change status user in database
+      const qUpdateStatus = `UPDATE users SET status = 1 WHERE id_users = ${req.user.id}'`;
+      const updateStatus = await asyncQuery(qUpdateStatus);
+
+      const getUser = `select * from users u
+                       join profile p on u.id_users = p.user_id where id_users = ${req.user.id}`
+      const result = await asyncQuery(getUser)
+
+      delete result[0].password
+
+      res.status(200).send(result[0]);
+    } catch (err) {
+      res.status(500).send(err);
     }
   },
 };
