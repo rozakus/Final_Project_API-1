@@ -3,7 +3,7 @@ const { asyncQuery, generateQuery } = require('../helpers/queryHelp')
 
 // export controller
 module.exports = {
-    orderPcs: async (req, res) => {
+    order: async (req, res) => {
         try {
             // define
             const { user_id, package_id, product_id, qty } = req.body
@@ -26,10 +26,18 @@ module.exports = {
                 values (${order_number}, ${user_id}, 1)`
                 const resultOrders = await asyncQuery(insertOrders)
 
+                // check query sama hasil
+                console.log(insertOrders)
+                console.log(resultOrders)
+
                 // insert order detail
                 const insertOrderDetail = `INSERT INTO orders_detail (order_number, package_id, product_id, qty, total)
                 values (${order_number}, ${package_id}, ${product_id}, ${qty}, 100000)`
                 const resultOrderDetail = await asyncQuery(insertOrderDetail)
+
+                // check query sama hasil
+                console.log(insertOrderDetail)
+                console.log(resultOrderDetail)
 
                 res.status(200).send(resultOrderDetail)
 
@@ -50,11 +58,14 @@ module.exports = {
                     const insertProduct = `INSERT INTO orders_detail (order_number, package_id, product_id, qty, total)
                     values (${order_number}, ${package_id}, ${product_id}, ${qty}, 100000)`
                     const resultInsert = await asyncQuery(insertProduct)
+
+                    // check query sama hasil
+                    console.log(insertProduct)
                     console.log(resultInsert)
 
                     res.status(200).send(resultInsert)
 
-                } else { // udah ada product, update
+                } else { // udah ada product id, update
 
                     // jumlah qty baru + qty di chart
                     const qtyUpdated = qty + resultProductDetails[0].qty // updated qty
@@ -63,9 +74,10 @@ module.exports = {
 
                     // update product
                     const updateOrderDetail = `UPDATE orders_detail SET qty=${qtyUpdated}
-                    WHERE product_id =${product_id} AND package_id = ${package_id}`
+                    WHERE order_number=${order_number} AND product_id =${product_id} AND package_id IS NULL`
                     const resultUpdate = await asyncQuery(updateOrderDetail)
 
+                    // check query sama hasil
                     console.log(updateOrderDetail)
                     console.log(resultUpdate)
 

@@ -5,7 +5,7 @@ const router = require('express').Router()
 const { orderController } = require('../controllers')
 
 // create router
-router.post('/order/pcs', orderController.orderPcs)
+router.post('/order', orderController.order)
 
 // export router
 module.exports = router
