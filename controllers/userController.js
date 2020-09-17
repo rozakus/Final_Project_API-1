@@ -59,7 +59,7 @@ module.exports = {
       delete req.body.confpass;
 
       //create token
-      const token = createToken({ id: newUser.insertId });
+      const token = createToken({ id: result.insertId });
 
       // sent email verification to user
       const option = {
@@ -73,7 +73,7 @@ module.exports = {
         Your hamper's best provider,
         PurwaHampers.`,
         html: `
-            <a href ="http://localhost:3000/verification?${token}">http://localhost:3000/verification?${token}</a>`,
+            <a href ="http://127.0.0.2:2000/verification?${token}">http://localhost:3000/verification?${token}</a>`,
       };
       const info = await transporter.sendMail(option);
 
