@@ -3,7 +3,7 @@ const { asyncQuery, generateQuery } = require('../helpers/queryHelp')
 
 // export controller
 module.exports = {
-    makeOrder: async (req, res) => {
+    orderPcs: async (req, res) => {
         try {
             // define
             const { user_id, package_id, product_id, qty } = req.body
@@ -30,10 +30,11 @@ module.exports = {
                 const insertOrderDetail = `INSERT INTO orders_detail (order_number, package_id, product_id, qty, total)
                 values (${order_number}, ${package_id}, ${product_id}, ${qty}, 100000)`
                 const resultOrderDetail = await asyncQuery(insertOrderDetail)
-            }
 
-            // udah ada order number
-            if (resultCheck[0] = true) {
+                res.status(200).send(resultOrderDetail)
+
+            } else { // udah ada order number
+
                 console.log('ada order number')
                 // get order number from mysql
                 order_number = resultCheck[0].order_number
@@ -50,22 +51,27 @@ module.exports = {
                     values (${order_number}, ${package_id}, ${product_id}, ${qty}, 100000)`
                     const resultInsert = await asyncQuery(insertProduct)
                     console.log(resultInsert)
-                }
 
-                // udah ada product, update
-                if (resultProductDetails[0] = true) {
+                    res.status(200).send(resultInsert)
+
+                } else { // udah ada product, update
+
                     // jumlah qty baru + qty di chart
-                    const qtyUpdated = qty + resultCheck[0].qty
+                    const qtyUpdated = qty + resultProductDetails[0].qty // updated qty
+                    console.log('result qty : ', resultProductDetails[0].qty) // old qty
+                    console.log('qty updated : ', qtyUpdated) // updated qty 
 
                     // update product
                     const updateOrderDetail = `UPDATE orders_detail SET qty=${qtyUpdated}
                     WHERE product_id =${product_id} AND package_id = ${package_id}`
                     const resultUpdate = await asyncQuery(updateOrderDetail)
+
+                    console.log(updateOrderDetail)
                     console.log(resultUpdate)
+
+                    res.status(200).send(resultUpdate)
                 }
             }
-
-            res.status(200).send('sukses brok')
         } catch (err) {
             console.log(err)
             res.status(500).send(err)
