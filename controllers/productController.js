@@ -2,7 +2,7 @@ const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 
 module.exports = {
   getAllProducts: async (req, res) => {
-    const query = "SELECT * FROM products";
+    const query = "select * from products p join product_img pi on p.id_product = pi.product_id";
     try {
       const result = await asyncQuery(query);
       res.status(200).send(result);

@@ -1,9 +1,9 @@
 const CryptoJS = require("crypto-js");
 const { validationResult } = require("express-validator");
 const { createToken } = require("../helpers/jwt");
-const db = require("../database");
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const SECRET_KEY = process.env.SECRET_KEY;
+const transporter = require('../helpers/nodemailer')
 
 module.exports = {
   getUserData: async (req, res) => {
@@ -23,12 +23,12 @@ module.exports = {
       //validate user input
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(422).send({ errors: errors.array()[0].msg });
+        return res.status(422).send(errors.array()[0].msg);
       }
 
       //check password
       if (password !== confpass) {
-        return res.status(400).send(`Password doesn't match !`);
+        return res.status(400).send(`Password and Confirm Password doesn't match!`);
       }
 
       //insert new user to database
@@ -42,25 +42,33 @@ module.exports = {
 
       // encrypt password before insert into database
       const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
-      const insertUser = `INSERT INTO users (username, email, password, role, status)
-                            values ('${username}', '${email}', '${hashpass.toString()}', 'user', 1)`;
-      const resultQuery = await asyncQuery(insertUser);
+      const query = `INSERT INTO users (username, email, password, role, status)
+                     values ('${username}', '${email}', '${hashpass.toString()}', 'user', 1)`;
+      const result = await asyncQuery(query);
 
       //prepare user's record data
-      req.body.password = resultQuery;
+      req.body.id = result.insertId;
       req.body.role = "user";
       req.body.status = 1;
-
-      //add user record to database
-      const addUser = `INSERT INTO users SET ?`;
-      const newUser = await asyncQuery(addUser, req.body);
-
-      //filter user's data
       delete req.body.password;
-      req.body.id = newUser.insertId;
+      delete req.body.confpass;
 
       //create token
-      const token = createToken({ id: newUser.insertId, username });
+      const token = createToken({ id: newUser.insertId });
+
+      // sent email verification to user
+      const option = {
+        from : `admin <frengky.sihombing.777@gmail.com>`,
+        to : ``,
+        subject : 'Email Verification',
+        text : '',
+        html : `
+            <h3>Click link below to verified your account</h3>
+            <a href ="http://localhost:3000/verification?${token}">http://localhost:3000/verification?${token}</a>`
+    }
+    const info = await transporter.sendMail(option)
+
+    res.status(200).send(info.response)
 
       res.status(200).send({ ...req.body, token });
     } catch (error) {
