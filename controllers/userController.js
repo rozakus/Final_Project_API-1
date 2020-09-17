@@ -69,7 +69,7 @@ module.exports = {
     }
   },
   login: async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, email } = req.body;
     console.log(req.body);
     try {
       const getDataUsername = `SELECT * FROM users WHERE username = '${username}' or email = '${email}'`;
@@ -83,7 +83,7 @@ module.exports = {
       //check password: password from user vs password from database
       const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
       if (hashpass.toString() !== resultUsername[0].password) {
-        return res.status(400).send(`Invalid password !`);
+        return res.status(400).send(`Invalid password!`);
       }
 
       //filter user's data
