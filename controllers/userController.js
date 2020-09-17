@@ -7,7 +7,7 @@ const transporter = require("../helpers/nodemailer");
 
 module.exports = {
   getUserData: async (req, res) => {
-    const getAllUsers = "SELECT * FROM users";
+    const getAllUsers = "SELECT * FROM users u join profile p on u.id_users = p.user_id";
     try {
       const resultDataUsers = await asyncQuery(getAllUsers);
       res.status(200).send(resultDataUsers);
@@ -50,16 +50,18 @@ module.exports = {
 
       // insert to profile
       const queryProfile = `insert into profile (user_id) values(${result.insertId})`
+      const resultProfile = await asyncQuery(queryProfile)
 
+      //create token
+      const token = createToken({ id: result.insertId });
+      
       //prepare user's record data
       req.body.id = result.insertId;
       req.body.role = "user";
       req.body.status = 1;
+      req.body.token = token
       delete req.body.password;
       delete req.body.confpass;
-
-      //create token
-      const token = createToken({ id: result.insertId });
 
       // sent email verification to user
       const option = {
@@ -73,23 +75,24 @@ module.exports = {
         Your hamper's best provider,
         PurwaHampers.`,
         html: `
-            <a href ="http://127.0.0.2:2000/verification?${token}">http://localhost:3000/verification?${token}</a>`,
+            <a href ="http://127.0.0.2:2000/verification/${token}">http://127.0.0.2:2000/verification/${token}</a>`,
       };
       const info = await transporter.sendMail(option);
+      console.log(req.body)
 
-      res.status(200).send(info.response);
+      res.status(200).send(req.body);
     } catch (error) {
       console.log(error);
       return res.status(500).send(error);
     }
   },
   login: async (req, res) => {
-    const { username, password, email } = req.body;
+    const { identity, password } = req.body;
     console.log(req.body);
     try {
       const getDataUsername = `SELECT * FROM users u
                                  join profile p on u.id_users = p.user_id
-                                WHERE username = '${username}' or email = '${email}'`;
+                                WHERE username = '${identity}' or email = '${identity}'`;
       const resultUsername = await asyncQuery(getDataUsername);
 
       //if username doesn't exist
@@ -108,7 +111,7 @@ module.exports = {
 
       //create token
       const token = createToken({
-        id: resultUsername[0].id
+        id: resultUsername[0].id_users
       });
       resultUsername[0].token = token;
 
@@ -122,8 +125,7 @@ module.exports = {
     console.log(`user : `, req.user);
     try {
       //query to get user's data
-      const queryKeepLogin = `SELECT * FROM users u
-                              join profile p on u.id_users = p.user_id where id_users = ${req.user.id}`;
+      const queryKeepLogin = `SELECT * FROM users u join profile p on u.id_users = p.user_id where u.id_users = ${req.user.id}`;
       const resultKeepLogin = await asyncQuery(queryKeepLogin);
 
       //prepare user's data
@@ -138,7 +140,7 @@ module.exports = {
   emailVerification: async (req, res) => {
     try {
       // change status user in database
-      const qUpdateStatus = `UPDATE users SET status = 1 WHERE id_users = ${req.user.id}'`;
+      const qUpdateStatus = `UPDATE users SET status = 2 WHERE id_users = ${req.user.id}`;
       const updateStatus = await asyncQuery(qUpdateStatus);
 
       const getUser = `select * from users u
@@ -147,7 +149,7 @@ module.exports = {
 
       delete result[0].password
 
-      res.status(200).send(result[0]);
+      res.status(200).send(`Congratulations! Your account has been verified`);
     } catch (err) {
       res.status(500).send(err);
     }
