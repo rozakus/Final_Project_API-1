@@ -76,7 +76,7 @@ module.exports = {
     }
   },
   getAllPackages: async (req, res) => {
-    const query = `SELECT p.id_product_package, p. package_name, p.description, 
+    const query = `SELECT p.id_product_package, p. package_name, p.description, p.img, 
     pd.category_id, pd.max_qty, 
       pr.id_product, pr.product_name, pr.price_modal, pr.product_stock, p.package_price
       FROM package p
@@ -92,7 +92,7 @@ module.exports = {
   },
   getPackageById: async (req, res) => {
     const id = parseInt(req.params.id);
-    const query = `SELECT p.id_product_package, p. package_name, p.description, 
+    const query = `SELECT p.id_product_package, p. package_name, p.description, p.img, 
       pd.category_id, pd.max_qty, 
       pr.id_product, pr.product_name, pr.price_modal, pr.product_stock, p.package_price
       FROM package p
