@@ -1,12 +1,11 @@
-// import
 const { asyncQuery, generateQuery } = require('../helpers/queryHelp')
 
 // export controller
 module.exports = {
-    makeOrder: async (req, res) => {
+    addToCartPcs: async (req, res) => {
         try {
             // define
-            const { user_id, package_id, product_id, qty } = req.body
+            const { user_id, product_id, total } = req.body
             let order_number = 0
             console.log(req.body)
 
@@ -21,14 +20,14 @@ module.exports = {
                 // generatate new order number
                 order_number = Date.now()
 
-                // insert order to tabel
+                // insert to order
                 const insertOrders = `INSERT INTO orders (order_number, user_id, status)
                 values (${order_number}, ${user_id}, 1)`
                 const resultOrders = await asyncQuery(insertOrders)
 
-                // insert order detail
-                const insertOrderDetail = `INSERT INTO orders_detail (order_number, package_id, product_id, qty, total)
-                values (${order_number}, ${package_id}, ${product_id}, ${qty}, 100000)`
+                // insert to order detail
+                const insertOrderDetail = `INSERT INTO orders_detail (order_number, product_id, qty, total)
+                values (${order_number}, ${product_id}, 1, ${total})`
                 const resultOrderDetail = await asyncQuery(insertOrderDetail)
             }
 
@@ -46,8 +45,8 @@ module.exports = {
                 // belom ada product id yg dipilih
                 if (resultProductDetails[0] === undefined) {
                     // insert product
-                    const insertProduct = `INSERT INTO orders_detail (order_number, package_id, product_id, qty, total)
-                    values (${order_number}, ${package_id}, ${product_id}, ${qty}, 100000)`
+                    const insertProduct = `INSERT INTO orders_detail (order_number, product_id, qty, total)
+                    values (${order_number}, ${product_id}, 1, ${total})`
                     const resultInsert = await asyncQuery(insertProduct)
                     console.log(resultInsert)
                 }
@@ -55,11 +54,11 @@ module.exports = {
                 // udah ada product, update
                 if (resultProductDetails[0] = true) {
                     // jumlah qty baru + qty di chart
-                    const qtyUpdated = qty + resultCheck[0].qty
+                    const qtyUpdated = resultCheck[0].qty + qty 
 
                     // update product
                     const updateOrderDetail = `UPDATE orders_detail SET qty=${qtyUpdated}
-                    WHERE product_id =${product_id} AND package_id = ${package_id}`
+                    WHERE product_id =${product_id} AND order_number = ${order_number}`
                     const resultUpdate = await asyncQuery(updateOrderDetail)
                     console.log(resultUpdate)
                 }
