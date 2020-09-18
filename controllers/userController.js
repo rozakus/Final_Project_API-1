@@ -1,13 +1,14 @@
 const CryptoJS = require("crypto-js");
 const { validationResult } = require("express-validator");
 const { createToken } = require("../helpers/jwt");
-const db = require("../database");
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const SECRET_KEY = process.env.SECRET_KEY;
+const transporter = require("../helpers/nodemailer");
 
 module.exports = {
   getUserData: async (req, res) => {
-    const getAllUsers = "SELECT * FROM users";
+    const getAllUsers =
+      "SELECT * FROM users u join profile p on u.id_users = p.user_id";
     try {
       const resultDataUsers = await asyncQuery(getAllUsers);
       res.status(200).send(resultDataUsers);
@@ -23,12 +24,14 @@ module.exports = {
       //validate user input
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(422).send({ errors: errors.array()[0].msg });
+        return res.status(422).send(errors.array()[0].msg);
       }
 
       //check password
       if (password !== confpass) {
-        return res.status(400).send(`Password doesn't match !`);
+        return res
+          .status(400)
+          .send(`Password and Confirm Password doesn't match!`);
       }
 
       //insert new user to database
@@ -42,37 +45,55 @@ module.exports = {
 
       // encrypt password before insert into database
       const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
-      const insertUser = `INSERT INTO users (username, email, password, role, status)
-                            values ('${username}', '${email}', '${hashpass.toString()}', 'user', 1)`;
-      const resultQuery = await asyncQuery(insertUser);
+      const query = `INSERT INTO users (username, email, password, role, status)
+                     values ('${username}', '${email}', '${hashpass.toString()}', 'user', 1)`;
+      const result = await asyncQuery(query);
 
-      //prepare user's record data
-      req.body.password = resultQuery;
-      req.body.role = "user";
-      req.body.status = 1;
-
-      //add user record to database
-      const addUser = `INSERT INTO users SET ?`;
-      const newUser = await asyncQuery(addUser, req.body);
-
-      //filter user's data
-      delete req.body.password;
-      req.body.id = newUser.insertId;
+      // insert to profile
+      const queryProfile = `insert into profile (user_id) values(${result.insertId})`;
+      const resultProfile = await asyncQuery(queryProfile);
 
       //create token
-      const token = createToken({ id: newUser.insertId, username });
+      const token = createToken({ id: result.insertId });
 
-      res.status(200).send({ ...req.body, token });
+      //prepare user's record data
+      req.body.id = result.insertId;
+      req.body.role = "user";
+      req.body.status = 1;
+      req.body.token = token;
+      delete req.body.password;
+      delete req.body.confpass;
+
+      // sent email verification to user
+      const option = {
+        from: `admin <frengky.sihombing.777@gmail.com>`,
+        to: `${email}`,
+        subject: "PurwaHampers Verification",
+        text: `Hello our precious customers, ${username}!
+        
+        Click link below to verified your account
+        
+        Your hamper's best provider,
+        PurwaHampers.`,
+        html: `
+            <a href ="http://127.0.0.2:2000/verification/${token}">http://127.0.0.2:2000/verification/${token}</a>`,
+      };
+      const info = await transporter.sendMail(option);
+      console.log(req.body);
+
+      res.status(200).send(req.body);
     } catch (error) {
       console.log(error);
       return res.status(500).send(error);
     }
   },
   login: async (req, res) => {
-    const { username, password } = req.body;
+    const { identity, password } = req.body;
     console.log(req.body);
     try {
-      const getDataUsername = `SELECT * FROM users WHERE username = '${username}' or email = '${email}'`;
+      const getDataUsername = `SELECT * FROM users u
+                                 join profile p on u.id_users = p.user_id
+                                WHERE username = '${identity}' or email = '${identity}'`;
       const resultUsername = await asyncQuery(getDataUsername);
 
       //if username doesn't exist
@@ -83,7 +104,7 @@ module.exports = {
       //check password: password from user vs password from database
       const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
       if (hashpass.toString() !== resultUsername[0].password) {
-        return res.status(400).send(`Invalid password !`);
+        return res.status(400).send(`Invalid password!`);
       }
 
       //filter user's data
@@ -91,10 +112,10 @@ module.exports = {
 
       //create token
       const token = createToken({
-        id: resultUsername[0].id,
-        username: resultUsername[0].username,
+        id: resultUsername[0].id_users,
       });
       resultUsername[0].token = token;
+
       res.status(200).send(resultUsername[0]);
     } catch (error) {
       console.log(error);
@@ -105,18 +126,89 @@ module.exports = {
     console.log(`user : `, req.user);
     try {
       //query to get user's data
-      const queryKeepLogin = `SELECT user_id, username, email, role FROM users 
-                            WHERE user_id=${req.user.id} AND username='${req.user.username}'`;
-        const resultKeepLogin = await asyncQuery(queryKeepLogin);
-        console.log("resultkeeplogin : ", resultKeepLogin);
+      const queryKeepLogin = `SELECT * FROM users u join profile p on u.id_users = p.user_id where u.id_users = ${req.user.id}`;
+      const resultKeepLogin = await asyncQuery(queryKeepLogin);
 
-        //prepare user's data
-        delete resultKeepLogin[0].password;
+      //prepare user's data
+      delete resultKeepLogin[0].password;
 
-        res.status(200).send(resultKeepLogin[0]);
+      res.status(200).send(resultKeepLogin[0]);
     } catch (error) {
       console.log(error);
       return res.status(500).send(error);
     }
   },
+  emailVerification: async (req, res) => {
+    try {
+      // change status user in database
+      const qUpdateStatus = `UPDATE users SET status = 2 WHERE id_users = ${req.user.id}`;
+      const updateStatus = await asyncQuery(qUpdateStatus);
+
+      const getUser = `select * from users u
+                       join profile p on u.id_users = p.user_id where id_users = ${req.user.id}`;
+      const result = await asyncQuery(getUser);
+
+      delete result[0].password;
+
+      res.status(200).send(`Congratulations! Your account has been verified`);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  },
+  editAddress: async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+      const query = `update profile set address = '${req.body.address}' where user_id = ${id}`;
+      const result = await asyncQuery(query);
+
+      res.status(200).send(result);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  },
+  editPass: async (req, res) => {
+    const id = parseInt(req.params.id);
+    const { oldpass, newpass, confpass } = req.body;
+
+    if (newpass !== confpass) return res.status(400).send("New Password and Confirm Password Doesn't Match");
+
+    //check new password requirement
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).send(errors.array()[0].msg);
+
+    try {
+      const queryCheckPass = `select * from users where id_users=${id}`
+      const check = await asyncQuery(queryCheckPass)
+
+      const hasholdpass = CryptoJS.HmacMD5(oldpass, SECRET_KEY);
+
+      if (hasholdpass.toString() !== check[0].password) return res.status(400).send("Old Password Doesn't Match");
+
+      //update password
+      const hashnewpass = CryptoJS.HmacMD5(newpass, SECRET_KEY);
+
+      const updatePass = `UPDATE users SET password='${hashnewpass.toString()}' WHERE id_users=${id}`;
+      const result = await asyncQuery(updatePass);
+      console.log(req.body)
+
+      res.status(200).send(result);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  },
+  transHistoryUser: async (req, res) => {
+    const id = parseInt(req.params.id)
+    try {
+        const query = `SELECT p.users_id, p.order_number, p.payment_date, pt.via_bank, p.amount, p.transaction_receipt, ps.status 
+        FROM payment p
+        join payment_type pt on p.payment_type_id=pt.id_payment_type
+        join payment_status ps on p.payment_status_id=ps.id_payment_status
+        where p.users_id=${id}`
+        const result = await asyncQuery(query)
+
+        res.status(200).send(result[0])
+    } catch(err) {
+        res.status(500).send(err)
+    }
+}
 };

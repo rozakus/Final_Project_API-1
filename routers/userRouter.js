@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { validator, validatePassword } = require('../helpers/validator');
-const { verify } = require('../helpers/jwt');
+const { verify, verify2 } = require('../helpers/jwt');
 
 //import controller
 const { userController } = require('../controllers');
@@ -10,6 +10,10 @@ router.get('/users', userController.getUserData);
 router.post('/register', validator,userController.register);
 router.post('/login', userController.login);
 router.post('/keeplogin', verify, userController.keeplogin);
+router.get('/verification/:token', verify2, userController.emailVerification);
+router.patch('/editaddress/:id', userController.editAddress);
+router.patch('/editpass/:id', validatePassword, userController.editPass);
+router.get('/transhistoryuser/:id', userController.transHistoryUser);
 
 //export router
 module.exports = router;
