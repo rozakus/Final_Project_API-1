@@ -1,12 +1,11 @@
-// import
 const { asyncQuery, generateQuery } = require('../helpers/queryHelp')
 
 // export controller
 module.exports = {
-    order: async (req, res) => {
+    addToCartPcs: async (req, res) => {
         try {
             // define
-            const { user_id, package_id, product_id, qty } = req.body
+            const { user_id, product_id, total } = req.body
             let order_number = 0
             console.log(req.body)
 
@@ -21,28 +20,19 @@ module.exports = {
                 // generatate new order number
                 order_number = Date.now()
 
-                // insert order to tabel
+                // insert to order
                 const insertOrders = `INSERT INTO orders (order_number, user_id, status)
                 values (${order_number}, ${user_id}, 1)`
                 const resultOrders = await asyncQuery(insertOrders)
 
-                // check query sama hasil
-                console.log(insertOrders)
-                console.log(resultOrders)
-
-                // insert order detail
-                const insertOrderDetail = `INSERT INTO orders_detail (order_number, package_id, product_id, qty, total)
-                values (${order_number}, ${package_id}, ${product_id}, ${qty}, 100000)`
+                // insert to order detail
+                const insertOrderDetail = `INSERT INTO orders_detail (order_number, product_id, qty, total)
+                values (${order_number}, ${product_id}, 1, ${total})`
                 const resultOrderDetail = await asyncQuery(insertOrderDetail)
+            }
 
-                // check query sama hasil
-                console.log(insertOrderDetail)
-                console.log(resultOrderDetail)
-
-                res.status(200).send(resultOrderDetail)
-
-            } else { // udah ada order number
-
+            // udah ada order number
+            if (resultCheck[0] = true) {
                 console.log('ada order number')
                 // get order number from mysql
                 order_number = resultCheck[0].order_number
@@ -55,35 +45,26 @@ module.exports = {
                 // belom ada product id yg dipilih
                 if (resultProductDetails[0] === undefined) {
                     // insert product
-                    const insertProduct = `INSERT INTO orders_detail (order_number, package_id, product_id, qty, total)
-                    values (${order_number}, ${package_id}, ${product_id}, ${qty}, 100000)`
+                    const insertProduct = `INSERT INTO orders_detail (order_number, product_id, qty, total)
+                    values (${order_number}, ${product_id}, 1, ${total})`
                     const resultInsert = await asyncQuery(insertProduct)
-
-                    // check query sama hasil
-                    console.log(insertProduct)
                     console.log(resultInsert)
+                }
 
-                    res.status(200).send(resultInsert)
-
-                } else { // udah ada product id, update
-
+                // udah ada product, update
+                if (resultProductDetails[0] = true) {
                     // jumlah qty baru + qty di chart
-                    const qtyUpdated = qty + resultProductDetails[0].qty // updated qty
-                    console.log('result qty : ', resultProductDetails[0].qty) // old qty
-                    console.log('qty updated : ', qtyUpdated) // updated qty 
+                    const qtyUpdated = resultCheck[0].qty + qty 
 
                     // update product
                     const updateOrderDetail = `UPDATE orders_detail SET qty=${qtyUpdated}
-                    WHERE order_number=${order_number} AND product_id =${product_id} AND package_id IS NULL`
+                    WHERE product_id =${product_id} AND order_number = ${order_number}`
                     const resultUpdate = await asyncQuery(updateOrderDetail)
-
-                    // check query sama hasil
-                    console.log(updateOrderDetail)
                     console.log(resultUpdate)
-
-                    res.status(200).send(resultUpdate)
                 }
             }
+
+            res.status(200).send('sukses brok')
         } catch (err) {
             console.log(err)
             res.status(500).send(err)
