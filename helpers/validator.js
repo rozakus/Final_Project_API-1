@@ -30,14 +30,14 @@ const validatePassword = [
     .notEmpty()
     .withMessage('new password is required.')
     .matches(/[!@#$%^&*;]/)
-    .withMessage('password must include special characters.')
+    .withMessage('new password must include special characters.')
     .matches(/[0-9]/)
-    .withMessage('password must include number.')
+    .withMessage('new password must include number.')
     .isLength({ min : 6 })
-    .withMessage('password must have min 6 characters.'),
+    .withMessage('new password must have min 6 characters.'),
     body('confpass')
     .notEmpty()
-    .withMessage('new conf password is required.')
+    .withMessage('new confirm password is required.')
 ]
 
 module.exports = { validator, validatePassword }

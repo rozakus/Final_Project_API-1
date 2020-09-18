@@ -7,7 +7,8 @@ const transporter = require("../helpers/nodemailer");
 
 module.exports = {
   getUserData: async (req, res) => {
-    const getAllUsers = "SELECT * FROM users u join profile p on u.id_users = p.user_id";
+    const getAllUsers =
+      "SELECT * FROM users u join profile p on u.id_users = p.user_id";
     try {
       const resultDataUsers = await asyncQuery(getAllUsers);
       res.status(200).send(resultDataUsers);
@@ -49,17 +50,17 @@ module.exports = {
       const result = await asyncQuery(query);
 
       // insert to profile
-      const queryProfile = `insert into profile (user_id) values(${result.insertId})`
-      const resultProfile = await asyncQuery(queryProfile)
+      const queryProfile = `insert into profile (user_id) values(${result.insertId})`;
+      const resultProfile = await asyncQuery(queryProfile);
 
       //create token
       const token = createToken({ id: result.insertId });
-      
+
       //prepare user's record data
       req.body.id = result.insertId;
       req.body.role = "user";
       req.body.status = 1;
-      req.body.token = token
+      req.body.token = token;
       delete req.body.password;
       delete req.body.confpass;
 
@@ -78,7 +79,7 @@ module.exports = {
             <a href ="http://127.0.0.2:2000/verification/${token}">http://127.0.0.2:2000/verification/${token}</a>`,
       };
       const info = await transporter.sendMail(option);
-      console.log(req.body)
+      console.log(req.body);
 
       res.status(200).send(req.body);
     } catch (error) {
@@ -111,7 +112,7 @@ module.exports = {
 
       //create token
       const token = createToken({
-        id: resultUsername[0].id_users
+        id: resultUsername[0].id_users,
       });
       resultUsername[0].token = token;
 
@@ -144,14 +145,70 @@ module.exports = {
       const updateStatus = await asyncQuery(qUpdateStatus);
 
       const getUser = `select * from users u
-                       join profile p on u.id_users = p.user_id where id_users = ${req.user.id}`
-      const result = await asyncQuery(getUser)
+                       join profile p on u.id_users = p.user_id where id_users = ${req.user.id}`;
+      const result = await asyncQuery(getUser);
 
-      delete result[0].password
+      delete result[0].password;
 
       res.status(200).send(`Congratulations! Your account has been verified`);
     } catch (err) {
       res.status(500).send(err);
     }
   },
+  editAddress: async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+      const query = `update profile set address = '${req.body.address}' where user_id = ${id}`;
+      const result = await asyncQuery(query);
+
+      res.status(200).send(result);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  },
+  editPass: async (req, res) => {
+    const id = parseInt(req.params.id);
+    const { oldpass, newpass, confpass } = req.body;
+
+    if (newpass !== confpass) return res.status(400).send("New Password and Confirm Password Doesn't Match");
+
+    //check new password requirement
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).send(errors.array()[0].msg);
+
+    try {
+      const queryCheckPass = `select * from users where id_users=${id}`
+      const check = await asyncQuery(queryCheckPass)
+
+      const hasholdpass = CryptoJS.HmacMD5(oldpass, SECRET_KEY);
+
+      if (hasholdpass.toString() !== check[0].password) return res.status(400).send("Old Password Doesn't Match");
+
+      //update password
+      const hashnewpass = CryptoJS.HmacMD5(newpass, SECRET_KEY);
+
+      const updatePass = `UPDATE users SET password='${hashnewpass.toString()}' WHERE id_users=${id}`;
+      const result = await asyncQuery(updatePass);
+      console.log(req.body)
+
+      res.status(200).send(result);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  },
+  transHistoryUser: async (req, res) => {
+    const id = parseInt(req.params.id)
+    try {
+        const query = `SELECT p.users_id, p.order_number, p.payment_date, pt.via_bank, p.amount, p.transaction_receipt, ps.status 
+        FROM payment p
+        join payment_type pt on p.payment_type_id=pt.id_payment_type
+        join payment_status ps on p.payment_status_id=ps.id_payment_status
+        where p.users_id=${id}`
+        const result = await asyncQuery(query)
+
+        res.status(200).send(result[0])
+    } catch(err) {
+        res.status(500).send(err)
+    }
+}
 };
