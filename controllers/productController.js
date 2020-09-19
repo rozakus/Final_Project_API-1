@@ -14,7 +14,9 @@ module.exports = {
   },
   getProductById: async (req, res) => {
     const id = parseInt(req.params.id);
-    const query = `SELECT * FROM products WHERE id_product = ${id}`;
+    const query = `SELECT * FROM products p 
+    join product_img pi on p.id_product = pi.product_id
+     WHERE id_product = ${id}`;
     try {
       const result = await asyncQuery(query);
       res.status(200).send(result);
@@ -52,7 +54,8 @@ module.exports = {
     const query = `select c1.id_category, c1.category, p.product_name, p.price_modal, p.price_sell, p.product_stock
     from categories c1 
     LEFT JOIN categories c2 ON c2.parent_id = c1.id_category
-    left join products p on c2.id_category=p.product_cate
+    left join products p on c2.id_category=p.product_cate 
+    join product_img pi on p.id_product = pi.product_id
     WHERE c1.parent_id = 1 AND c1.id_category=${id}`;
     try {
       const result = await asyncQuery(query);
@@ -63,10 +66,11 @@ module.exports = {
   },
   getProdCateLv3: async (req, res) => {
     const id = parseInt(req.params.id)
-    const query = `select c1.id_category, c1.category, p.product_name, p.price_modal, p.price_sell, p.product_stock
+    const query = `select c1.id_category, c1.category, p.id_product, p.product_name, p.price_modal, p.price_sell, p.product_stock
     from categories c1 
     LEFT JOIN categories c2 ON c2.parent_id = c1.id_category
-    left join products p on c1.id_category=p.product_cate
+    left join products p on c1.id_category=p.product_cate 
+    join product_img pi on p.id_product = pi.product_id
     WHERE c2.id_category IS NULL AND c1.id_category=${id}`;
     try {
       const result = await asyncQuery(query);
@@ -107,4 +111,15 @@ module.exports = {
       res.status(500).send(err);
     }
   },
+  getAllProductPackage: async (req, res) => {
+    try {
+      const query = `SELECT * FROM package`
+      const result = await asyncQuery(query)
+
+      res.status(200).send(result)
+    } catch (err) {
+      console.log(err);
+      res.status(500).send(err);
+    }
+  }
 };

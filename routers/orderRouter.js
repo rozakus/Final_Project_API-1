@@ -1,11 +1,7 @@
-// import module router
 const router = require('express').Router()
 
-// import controllers
 const { orderController } = require('../controllers')
 
-// create router
-router.post('/order', orderController.order)
+router.post('/addtocartpcs', orderController.addToCartPcs)
 
-// export router
 module.exports = router
