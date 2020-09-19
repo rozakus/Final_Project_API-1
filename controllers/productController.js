@@ -111,4 +111,15 @@ module.exports = {
       res.status(500).send(err);
     }
   },
+  getAllProductPackage: async (req, res) => {
+    try {
+      const query = `SELECT * FROM package`
+      const result = await asyncQuery(query)
+
+      res.status(200).send(result)
+    } catch (err) {
+      console.log(err);
+      res.status(500).send(err);
+    }
+  }
 };
