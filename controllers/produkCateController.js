@@ -23,10 +23,11 @@ module.exports = {
     },
     getProductByLv2Cate: async (req, res) => {
         const { id } = req.params
-        const query = `SELECT c1.id_category, c1.category, c2.id_category, c2.category, p.id_product, p.product_name, p.price_sell, p.product_stock
+        const query = `SELECT c1.id_category, c1.category, c2.id_category, c2.category, p.id_product, p.product_name, p.price_sell, p.product_stock, pi.image 
         FROM categories c1
         LEFT JOIN categories c2 ON c2.parent_id = c1.id_category
         left join products p on c2.id_category = p.product_cate
+        join product_img pi on p.id_product = pi.product_id
         where c1.parent_id = 1 and c1.id_category = ${id}`
         try {
             const result = await asyncQuery(query)
@@ -37,10 +38,11 @@ module.exports = {
     },
     getProductByLv3Cate: async (req, res) => {
         const { id } = req.params
-        const query = `SELECT c1.id_category, c1.category, c2.id_category, c2.category, p.id_product, p.product_name, p.price_sell, p.product_stock
+        const query = `SELECT c1.id_category, c1.category, c2.id_category, c2.category, p.id_product, p.product_name, p.price_sell, p.product_stock, pi.image 
         FROM categories c1
         LEFT JOIN categories c2 ON c2.parent_id = c1.id_category
         left join products p on c2.id_category = p.product_cate
+        join product_img pi on p.id_product = pi.product_id
         where c1.parent_id = 1 and c2.id_category = ${id}`
         try {
             const result = await asyncQuery(query)
