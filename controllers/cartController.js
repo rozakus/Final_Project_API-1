@@ -1,7 +1,24 @@
+const { parse } = require("dotenv/types");
 const { asyncQuery, queryCartPkg } = require("../helpers/queryHelp");
 
 // export controller
 module.exports = {
+  getCart: async (req, res) => {
+    const id = parseInt(req.params.id)
+    try {
+      const query = `select o.order_number, o.user_id, o.status, od.package_id, od.package_no, od.product_id, od.product_qty, od.total, p.package_name, p.package_price 
+      from orders o
+      join orders_detail od on o.order_number=od.order_number
+      left join package p on od.package_id=p.id_product_package
+      where o.user_id=${id} and o.status=1`
+      const res = await asyncQuery(query)
+
+      res.status(200).send(res)
+    } catch (err) {
+      console.log(err)
+      res.status(500).send(err)
+    }
+  },
   addToCartPcs: async (req, res) => {
     try {
       // define
@@ -137,4 +154,17 @@ module.exports = {
       res.status(500).send(err);
     }
   },
+  editQtyPcs: async (req, res) => {
+    const { qty, total, product_id, order_number } = req.body
+    try {
+      const query = `update orders_detail SET product_qty=${qty}, total=${total} 
+      WHERE product_id =${product_id} AND order_number = ${order_number}`
+      const res = await asyncQuery(query)
+
+      res.status(200).send(res)
+    } catch (err) {
+      console.log(err)
+      res.status(500).send(err)
+    }
+  }
 };
