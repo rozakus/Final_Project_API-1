@@ -14,9 +14,10 @@ module.exports = {
   },
   getProductById: async (req, res) => {
     const id = parseInt(req.params.id);
-    const query = `SELECT * FROM products p 
+    const query = `select * from products p
     join product_img pi on p.id_product = pi.product_id
-     WHERE id_product = ${id}`;
+    join categories c on p.product_cate=c.id_category
+    where p.id_product=${id}`;
     try {
       const result = await asyncQuery(query);
       res.status(200).send(result);
