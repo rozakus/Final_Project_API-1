@@ -13,5 +13,6 @@ router.get('/getProdCate3/:id', productController.getProdCateLv3)
 router.get('/getAllPackages', productController.getAllPackages)
 router.get('/getPackage/:id', productController.getPackageById)
 router.get('/getAllProductPackage', productController.getAllProductPackage)
+router.get('/getProductPackageDetails/:id', productController.getProductPackageDetailsById)
 
 module.exports = router
