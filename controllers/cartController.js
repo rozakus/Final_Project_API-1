@@ -157,12 +157,38 @@ module.exports = {
   editQtyPcs: async (req, res) => {
     const { qty, total, product_id, order_number } = req.body
     try {
-      const query = `update orders_detail SET product_qty=${qty}, total=${total} 
-      WHERE product_id =${product_id} AND order_number = ${order_number}`
+        const query = `update orders_detail SET product_qty=${qty}, total=${total} 
+        WHERE product_id =${product_id} AND order_number = ${order_number}`
+        const res = await asyncQuery(query)
+
+        res.status(200).send(res)
+      
+    } catch (err) {
+      console.log(err)
+      res.status(500).send(err)
+    }
+  },
+  deletePcs: async (req, res) => {
+    const { order_number, product_id} =req.body
+    try {
+      const query = `delete from orders_detail where order_number=${order_number} and product_id=${product_id}`
       const res = await asyncQuery(query)
 
       res.status(200).send(res)
-    } catch (err) {
+    } catch(err) {
+      console.log(err)
+      res.status(500).send(err)
+    }
+  },
+  deletePkg: async (req, res) => {
+    const { order_number, package_id, package_no } = req.body
+    try {
+      const query = `delete from orders_detail 
+      where order_number=${order_number} and package_id=${package_id} and package_no=${package_no}`
+      const res = await asyncQuery(query)
+
+      res.status(200).send(res)
+    } catch(err) {
       console.log(err)
       res.status(500).send(err)
     }
