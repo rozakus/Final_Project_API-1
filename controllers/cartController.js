@@ -1,4 +1,3 @@
-const { parse } = require("dotenv/types");
 const { asyncQuery, queryCartPkg } = require("../helpers/queryHelp");
 
 // export controller
