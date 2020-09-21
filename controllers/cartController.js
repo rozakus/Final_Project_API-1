@@ -9,9 +9,9 @@ module.exports = {
       from orders o
       join orders_detail od on o.order_number=od.order_number
       where o.user_id=${id} and o.status=1`
-      const res = await asyncQuery(query)
+      const result = await asyncQuery(query)
 
-      res.status(200).send(res)
+      res.status(200).send(result)
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
