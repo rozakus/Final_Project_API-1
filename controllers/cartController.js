@@ -5,13 +5,17 @@ module.exports = {
   getCart: async (req, res) => {
     const id = parseInt(req.params.id)
     try {
-      const query = `select o.order_number, o.user_id, o.status, od.package_id, od.package_no, od.product_id, od.product_qty, od.total_sell 
+      const query = `select o.order_number, o.user_id, o.status, od.package_id, pkg.package_name, pkg.img ,od.package_no, od.product_id, pro.product_name, pro_img.image, od.product_qty, pro.price_sell , od.total_sell 
       from orders o
-      join orders_detail od on o.order_number=od.order_number
-      where o.user_id=${id} and o.status=1`
-      const res = await asyncQuery(query)
+      join orders_detail od on o.order_number = od.order_number
+      left join package pkg on od.package_id = pkg.id_product_package
+      join products pro on od.product_id = pro.id_product
+      join product_img pro_img on pro.id_product = pro_img.product_id
+      where o.user_id=${id} and o.status=1
+      order by od.package_id`
+      const result = await asyncQuery(query)
 
-      res.status(200).send(res)
+      res.status(200).send(result)
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
@@ -21,7 +25,7 @@ module.exports = {
     try {
       // define
       const { user_id, product_id, product_qty, total_modal, total_sell } = req.body;
-      
+
       // check order number from user id
       const queryCheck = `SELECT * FROM orders WHERE user_id = ${user_id} AND status = 1`;
       const resultCheck = await asyncQuery(queryCheck);
@@ -70,7 +74,7 @@ module.exports = {
           // update qty, total sell, total modal
           const qtyUpd = pq + product_qty
           const totModUpd = tm + total_modal;
-          const totSelUpd = tm + total_sell;
+          const totSelUpd = ts + total_sell;
 
           // update product
           const updateOrderDetail = `UPDATE orders_detail SET product_qty=${qtyUpd}, total_modal=${totModUpd}, total_sell=${totSelUpd} 
@@ -160,25 +164,25 @@ module.exports = {
   editQtyPcs: async (req, res) => {
     const { qty, total_modal, total_sell, product_id, order_number } = req.body
     try {
-        const query = `update orders_detail SET product_qty=${qty}, total_modal=${total_modal}, total_sell=${total_sell} 
+      const query = `update orders_detail SET product_qty=${qty}, total_modal=${total_modal}, total_sell=${total_sell} 
         WHERE product_id =${product_id} AND order_number = ${order_number}`
-        const res = await asyncQuery(query)
+      const res = await asyncQuery(query)
 
-        res.status(200).send(res)
-      
+      res.status(200).send(res)
+
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
     }
   },
   deletePcs: async (req, res) => {
-    const { order_number, product_id} =req.body
+    const { order_number, product_id } = req.body
     try {
       const query = `delete from orders_detail where order_number=${order_number} and product_id=${product_id}`
       const res = await asyncQuery(query)
 
       res.status(200).send(res)
-    } catch(err) {
+    } catch (err) {
       console.log(err)
       res.status(500).send(err)
     }
@@ -191,7 +195,7 @@ module.exports = {
       const res = await asyncQuery(query)
 
       res.status(200).send(res)
-    } catch(err) {
+    } catch (err) {
       console.log(err)
       res.status(500).send(err)
     }
