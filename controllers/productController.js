@@ -122,5 +122,21 @@ module.exports = {
       console.log(err);
       res.status(500).send(err);
     }
+  },
+  getProductPackageDetailsById: async (req, res) => {
+    try {
+      const id_package = parseInt(req.params.id);
+      const query = `SELECT pkg.id_product_package, pkg.package_name, pkg.package_price, pkg.img, pkg_d.category_id, pkg_d.max_qty
+      FROM package pkg
+      JOIN package_details pkg_d
+      ON pkg.id_product_package = pkg_d.package_id
+      WHERE pkg.id_product_package = ${id_package}`
+      const result = await asyncQuery(query)
+
+      res.status(200).send(result)
+    } catch (err) {
+      console.log(err);
+      res.status(500).send(err);
+    }
   }
 };

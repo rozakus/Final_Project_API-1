@@ -90,7 +90,7 @@ module.exports = {
       // define
       const { user_id, package_id } = req.body;
       console.log(req.body);
-      
+
       // check order number from user id
       const queryCheck = `SELECT * FROM orders WHERE user_id = ${user_id} AND status = 1`;
       const resultCheck = await asyncQuery(queryCheck);
@@ -141,14 +141,14 @@ module.exports = {
         if (resultPackageDetails.length > 0) {
           // package no tambah 1
           const pkgNoUpd =
-          resultPackageDetails[resultPackageDetails.length - 1].package_no +
+            resultPackageDetails[resultPackageDetails.length - 1].package_no +
             1;
           // insert order detail dengan package yg sama tapi beda nomor
           const insertProduct =
             `INSERT INTO orders_detail (order_number, package_id, package_no, product_id, product_qty, total_modal, total_sell) values ` +
             queryCartPkg(order_number, req.body, pkgNoUpd);
           const resultInsert = await asyncQuery(insertProduct);
-          
+
           return res.status(200).send("sukses brok");
         }
       }
