@@ -74,7 +74,7 @@ module.exports = {
           // update qty, total sell, total modal
           const qtyUpd = pq + product_qty
           const totModUpd = tm + total_modal;
-          const totSelUpd = tm + total_sell;
+          const totSelUpd = ts + total_sell;
 
           // update product
           const updateOrderDetail = `UPDATE orders_detail SET product_qty=${qtyUpd}, total_modal=${totModUpd}, total_sell=${totSelUpd} 
