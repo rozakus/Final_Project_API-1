@@ -13,6 +13,6 @@ module.exports = {
     productCateController,
     cartController,
     orderController,
-    adminController
+    adminController,
     profileController
 }

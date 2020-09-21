@@ -2,7 +2,7 @@ const { asyncQuery } = require('../helpers/queryHelp');
 
 module.exports = {
     getProfile : async (req, res) => {
-        const id = parseInt(req.params.id)
+        const id_profile = parseInt(req.params.id)
         try {
             const queryGetProfile = `SELECT * FROM profile WHERE id_profile = ${id_profile}`
             const resultGetProfile = await asyncQuery(queryGetProfile)
