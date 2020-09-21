@@ -24,11 +24,12 @@ app.get("/", (req, res) => {
 });
 
 //apply router
-const { userRouter, productRouter, productCateRouter, cartRouter } = require("./routers");
+const { userRouter, productRouter, productCateRouter, cartRouter, orderRouter } = require("./routers");
 app.use("", userRouter);
 app.use("", productRouter);
 app.use('', productCateRouter)
 app.use("", cartRouter)
+app.use("", orderRouter)
 
 // bind or host in localhost
 const PORT = process.env.PORT;
