@@ -5,10 +5,9 @@ module.exports = {
   getCart: async (req, res) => {
     const id = parseInt(req.params.id)
     try {
-      const query = `select o.order_number, o.user_id, o.status, od.package_id, od.package_no, od.product_id, od.product_qty, od.total, p.package_name, p.package_price 
+      const query = `select o.order_number, o.user_id, o.status, od.package_id, od.package_no, od.product_id, od.product_qty, od.total_sell 
       from orders o
       join orders_detail od on o.order_number=od.order_number
-      left join package p on od.package_id=p.id_product_package
       where o.user_id=${id} and o.status=1`
       const res = await asyncQuery(query)
 
@@ -21,8 +20,8 @@ module.exports = {
   addToCartPcs: async (req, res) => {
     try {
       // define
-      const { user_id, product_id, product_qty, total } = req.body;
-
+      const { user_id, product_id, product_qty, total_modal, total_sell } = req.body;
+      
       // check order number from user id
       const queryCheck = `SELECT * FROM orders WHERE user_id = ${user_id} AND status = 1`;
       const resultCheck = await asyncQuery(queryCheck);
@@ -30,7 +29,7 @@ module.exports = {
 
       // belom ada order number, generate
       if (resultCheck[0] === undefined) {
-        console.log('belum ada order number')
+        // console.log('belum ada order number')
 
         // insert to order
         const insertOrders = `INSERT INTO orders (order_number, user_id, status)
@@ -38,9 +37,10 @@ module.exports = {
         const resultOrders = await asyncQuery(insertOrders);
 
         // insert to order detail
-        const insertOrderDetail = `INSERT INTO orders_detail (order_number, product_id, product_qty, total)
-                values (${order_number}, ${product_id}, ${product_qty}, ${total})`;
+        const insertOrderDetail = `INSERT INTO orders_detail (order_number, product_id, product_qty, total_modal, total_sell)
+                values (${order_number}, ${product_id}, ${product_qty}, ${total_modal}), ${total_sell}`;
         const resultOrderDetail = await asyncQuery(insertOrderDetail);
+
         return res.status(200).send("sukses brok");
       }
 
@@ -52,27 +52,31 @@ module.exports = {
         const checkProductDetails = `SELECT * from orders_detail WHERE order_number = ${order_number} AND product_id = ${product_id}`;
         const resultProductDetails = await asyncQuery(checkProductDetails);
         const pq = resultProductDetails[0] ? resultProductDetails[0].product_qty : 0
-        const to = resultProductDetails[0] ? resultProductDetails[0].total : 0
+        const tm = resultProductDetails[0] ? resultProductDetails[0].total_modal : 0
+        const ts = resultProductDetails[0] ? resultProductDetails[0].total_sell : 0
 
         // belom ada product id yg dipilih
         if (resultProductDetails[0] === undefined) {
           // insert product
-          const insertProduct = `INSERT INTO orders_detail (order_number, product_id, product_qty, total)
-                    values (${order_number}, ${product_id}, ${product_qty}, ${total})`;
+          const insertProduct = `INSERT INTO orders_detail (order_number, product_id, product_qty, total_modal, total_sell)
+          values (${order_number}, ${product_id}, ${product_qty}, ${total_modal}), ${total_sell}`;
           const resultInsert = await asyncQuery(insertProduct);
+
           return res.status(200).send("sukses brok");
         }
 
         // udah ada product, update
         if ((resultProductDetails[0] = true)) {
-          // jumlah qty baru + qty di chart
-          const qtyUpdated = pq + product_qty
-          const totalUpdate = to + total;
+          // update qty, total sell, total modal
+          const qtyUpd = pq + product_qty
+          const totModUpd = tm + total_modal;
+          const totSelUpd = tm + total_sell;
 
           // update product
-          const updateOrderDetail = `UPDATE orders_detail SET product_qty=${qtyUpdated}, total=${totalUpdate} 
+          const updateOrderDetail = `UPDATE orders_detail SET product_qty=${qtyUpd}, total_modal=${totModUpd}, total_sell=${totSelUpd} 
           WHERE product_id =${product_id} AND order_number = ${order_number}`;
           const resultUpdate = await asyncQuery(updateOrderDetail);
+
           return res.status(200).send("sukses brok");
         }
       }
@@ -104,7 +108,7 @@ module.exports = {
         // insert to order detail
         const pkg_no = 1;
         const insertOrderDetail =
-          `INSERT INTO orders_detail (order_number, package_id, package_no, product_id, product_qty, total) values ` +
+          `INSERT INTO orders_detail (order_number, package_id, package_no, product_id, product_qty, total_modal, total_sell) values ` +
           queryCartPkg(order_number, req.body, pkg_no);
         const resultOrderDetail = await asyncQuery(insertOrderDetail);
 
@@ -126,7 +130,7 @@ module.exports = {
           // insert product
           const pkg_no = 1;
           const insertOrderDetail =
-            `INSERT INTO orders_detail (order_number, package_id, package_no, product_id, product_qty, total) values ` +
+            `INSERT INTO orders_detail (order_number, package_id, package_no, product_id, product_qty, total_modal, total_sell) values ` +
             queryCartPkg(order_number, req.body, pkg_no);
           const resultInsert = await asyncQuery(insertOrderDetail);
 
@@ -141,7 +145,7 @@ module.exports = {
             1;
           // insert order detail dengan package yg sama tapi beda nomor
           const insertProduct =
-            `INSERT INTO orders_detail (order_number, package_id, package_no, product_id, product_qty, total) values ` +
+            `INSERT INTO orders_detail (order_number, package_id, package_no, product_id, product_qty, total_modal, total_sell) values ` +
             queryCartPkg(order_number, req.body, pkgNoUpd);
           const resultInsert = await asyncQuery(insertProduct);
 
@@ -154,9 +158,9 @@ module.exports = {
     }
   },
   editQtyPcs: async (req, res) => {
-    const { qty, total, product_id, order_number } = req.body
+    const { qty, total_modal, total_sell, product_id, order_number } = req.body
     try {
-        const query = `update orders_detail SET product_qty=${qty}, total=${total} 
+        const query = `update orders_detail SET product_qty=${qty}, total_modal=${total_modal}, total_sell=${total_sell} 
         WHERE product_id =${product_id} AND order_number = ${order_number}`
         const res = await asyncQuery(query)
 
