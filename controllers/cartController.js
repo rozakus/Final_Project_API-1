@@ -5,17 +5,23 @@ module.exports = {
   getCart: async (req, res) => {
     const id = parseInt(req.params.id)
     try {
-      const query = `select o.order_number, o.user_id, o.status, od.package_id, pkg.package_name, pkg.img ,od.package_no, od.product_id, pro.product_name, pro_img.image, od.product_qty, pro.price_sell , od.total_sell 
+      const queryPcs = `select o.order_number, od.product_id, p.product_name, od.product_qty, od.total_sell 
       from orders o
-      join orders_detail od on o.order_number = od.order_number
-      left join package pkg on od.package_id = pkg.id_product_package
-      join products pro on od.product_id = pro.id_product
-      join product_img pro_img on pro.id_product = pro_img.product_id
-      where o.user_id=${id} and o.status=1
-      order by od.package_id`
-      const result = await asyncQuery(query)
+      join orders_detail od on o.order_number=od.order_number
+      join products p on od.product_id=p.id_product
+      where od.package_id is null and o.user_id=${id} and o.status=1`
+      const resultPcs = await asyncQuery(queryPcs)
 
-      res.status(200).send(result)
+      const queryPkg = `select o.order_number, od.package_id, p.package_name, od.package_no, group_concat(pr.product_name separator ',') as product_name, od.total_sell 
+      from orders o
+      join orders_detail od on o.order_number=od.order_number
+      join products pr on od.product_id=pr.id_product
+      join package p on od.package_id=p.id_product_package
+      where od.package_id is not null and o.user_id=${id} and o.status=1
+      group by od.package_no`
+      const resultPkg = await asyncQuery(queryPkg)
+
+      res.status(200).send({resultPcs, resultPkg})
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
@@ -42,7 +48,7 @@ module.exports = {
 
         // insert to order detail
         const insertOrderDetail = `INSERT INTO orders_detail (order_number, product_id, product_qty, total_modal, total_sell)
-                values (${order_number}, ${product_id}, ${product_qty}, ${total_modal}), ${total_sell}`;
+                values (${order_number}, ${product_id}, ${product_qty}, ${total_modal}, ${total_sell})`;
         const resultOrderDetail = await asyncQuery(insertOrderDetail);
 
         return res.status(200).send("sukses brok");
@@ -63,7 +69,7 @@ module.exports = {
         if (resultProductDetails[0] === undefined) {
           // insert product
           const insertProduct = `INSERT INTO orders_detail (order_number, product_id, product_qty, total_modal, total_sell)
-          values (${order_number}, ${product_id}, ${product_qty}, ${total_modal}), ${total_sell}`;
+          values (${order_number}, ${product_id}, ${product_qty}, ${total_modal}, ${total_sell})`;
           const resultInsert = await asyncQuery(insertProduct);
 
           return res.status(200).send("sukses brok");

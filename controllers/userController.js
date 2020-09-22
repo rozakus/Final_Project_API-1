@@ -98,7 +98,7 @@ module.exports = {
 
       //if username doesn't exist
       if (resultUsername.length === 0) {
-        return res.status(400).send(`Username or Email not found`);
+        return res.status(404).send(`Username or Email doesn't exist`);
       }
 
       //check password: password from user vs password from database
