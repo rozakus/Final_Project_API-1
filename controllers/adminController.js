@@ -85,5 +85,18 @@ module.exports = {
             console.log(err)
             res.status(500).send(err)
         }
+    },
+    reStock: async (req, res) => {
+        const {restock, id_product} = req.body
+        try {
+            const query = `update from products set product_stock=${restock}
+                           where id_product=${id_product}`
+            const result = await asyncQuery(query)
+
+            res.status(200).send(result)
+        } catch(err) {
+            console.log(err)
+            res.status(500).send(err)
+        }
     }
 }
