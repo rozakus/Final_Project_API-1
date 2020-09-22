@@ -124,7 +124,26 @@ module.exports = {
         item.product_stock = item.product_stock.split(',')
       });
 
-      res.status(200).send(result);
+      let tempRes = [...result]
+      for (let i = 0; i < result.length; i++) {
+        tempRes[i].product = []
+        for (let j = 0; j < result[i].product_id.length; j++) {
+          tempRes[i].product.push({ 
+            product_id: result[i].product_id[j], 
+            product_name: result[i].product_name[j],
+            price_modal: result[i].price_modal[j],
+            product_stock: result[i].product_stock[j],
+
+           })
+        }
+        delete tempRes[i].product_id
+        delete tempRes[i].product_name
+        delete tempRes[i].price_modal
+        delete tempRes[i].product_stock
+      }
+      
+
+      res.status(200).send(tempRes);
     } catch (err) {
       console.log(err);
       res.status(500).send(err);
