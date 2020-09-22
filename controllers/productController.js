@@ -81,15 +81,34 @@ module.exports = {
     }
   },
   getAllPackages: async (req, res) => {
-    const query = `SELECT p.id_product_package, p. package_name, p.description, p.img, 
-    pd.category_id, pd.max_qty, 
-      pr.id_product, pr.product_name, pr.price_modal, pr.product_stock, p.package_price
-      FROM package p
-      JOIN package_details pd ON p.id_product_package = pd.package_id
-      LEFT JOIN products pr ON pd.category_id = pr.product_cate`;
+    const query = `SELECT p.id_product_package, p.package_name, p.package_price, p.img, 
+    group_concat(c.category separator ',') as category, 
+    group_concat(pd.max_qty separator ',') as max_qty
+    FROM package p
+    JOIN package_details pd ON p.id_product_package = pd.package_id
+    join categories c on pd.category_id=c.id_category
+    group by p.id_product_package`;
     try {
       const result = await asyncQuery(query);
-      res.status(200).send(result);
+      result.forEach((item, index) => {
+        item.category = item.category.split(',')
+        item.max_qty = item.max_qty.split(',')
+      });
+
+      let tempRes = [...result]
+      for (let i = 0; i < result.length; i++) {
+        tempRes[i].details = []
+        for (let j = 0; j < result[i].category.length; j++) {
+          tempRes[i].details.push({ 
+            category: result[i].category[j], 
+            max_qty: result[i].max_qty[j],
+           })
+        }
+        delete tempRes[i].category
+        delete tempRes[i].max_qty
+      }
+
+      res.status(200).send(tempRes);
     } catch (err) {
       console.log(err);
       res.status(5000).send(err);
@@ -142,7 +161,6 @@ module.exports = {
         delete tempRes[i].product_stock
       }
       
-
       res.status(200).send(tempRes);
     } catch (err) {
       console.log(err);
