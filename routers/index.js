@@ -12,6 +12,6 @@ module.exports = {
     productCateRouter,
     cartRouter,
     orderRouter,
-    adminRouter
+    adminRouter,
     profileRouter
  };
