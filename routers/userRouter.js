@@ -13,7 +13,7 @@ router.post('/keeplogin', verify, userController.keeplogin);
 router.get('/verification/:token', verify2, userController.emailVerification);
 router.patch('/editaddress/:id', userController.editAddress);
 router.patch('/editpass/:id', validatePassword, userController.editPass);
-router.get('/transhistoryuser/:id', userController.transHistoryUser);
+router.get('/purchasedhistory/:id', userController.purchasedHistory);
 
 //export router
 module.exports = router;

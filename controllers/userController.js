@@ -196,14 +196,15 @@ module.exports = {
       res.status(500).send(err);
     }
   },
-  transHistoryUser: async (req, res) => {
+  purchasedHistory: async (req, res) => {
     const id = parseInt(req.params.id)
     try {
-        const query = `SELECT p.users_id, p.order_number, p.payment_date, pt.via_bank, p.amount, p.transaction_receipt, ps.status 
-        FROM payment p
-        join payment_type pt on p.payment_type_id=pt.id_payment_type
-        join payment_status ps on p.payment_status_id=ps.id_payment_status
-        where p.users_id=${id}`
+        const query = `SELECT o.order_number, o.user_id, o.status, od.package_id, p.package_name, od.package_no, od.product_id, pr.product_name, od.product_qty, od.total_sell 
+        from orders o
+        join orders_detail od on o.order_number=od.order_number
+        left join package p on od.package_id=p.id_product_package
+        left join products pr on od.product_id=pr.id_product
+        where o.user_id=${id}`
         const result = await asyncQuery(query)
 
         res.status(200).send(result[0])
