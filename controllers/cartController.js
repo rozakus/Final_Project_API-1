@@ -5,10 +5,11 @@ module.exports = {
   getCart: async (req, res) => {
     const id = parseInt(req.params.id)
     try {
-      const queryPcs = `select o.order_number, od.product_id, p.product_name, od.product_qty, od.total_sell 
+      const queryPcs = `select o.order_number, od.product_id, p.product_name, p.price_modal, p.price_sell,od.product_qty, od.total_sell, pm.image 
       from orders o
       join orders_detail od on o.order_number=od.order_number
       join products p on od.product_id=p.id_product
+      join product_img pm on od.product_id=pm.product_id
       where od.package_id is null and o.user_id=${id} and o.status=1`
       const resultPcs = await asyncQuery(queryPcs)
 
@@ -21,7 +22,7 @@ module.exports = {
       group by od.package_no`
       const resultPkg = await asyncQuery(queryPkg)
 
-      res.status(200).send({resultPcs, resultPkg})
+      res.status(200).send({ resultPcs, resultPkg })
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
@@ -183,11 +184,12 @@ module.exports = {
   },
   deletePcs: async (req, res) => {
     const { order_number, product_id } = req.body
+    console.log(req.body)
     try {
       const query = `delete from orders_detail where order_number=${order_number} and product_id=${product_id}`
-      const res = await asyncQuery(query)
+      const result = await asyncQuery(query)
 
-      res.status(200).send(res)
+      res.status(200).send(result)
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
