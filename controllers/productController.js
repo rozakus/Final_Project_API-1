@@ -116,7 +116,8 @@ module.exports = {
   },
   getPackageById: async (req, res) => {
     const id = parseInt(req.params.id);
-    const query = `select p.id_product_package, p. package_name, p.description, p.img, pd.category_id, c.category, pd.max_qty, 
+    const query = `select p.id_product_package, p. package_name, p.description, p.img, p.package_price, c.category, pd.max_qty, 
+    group_concat(pd.category_id separator',') as category_id, 
     group_concat(pr.id_product separator',') as product_id, 
     group_concat(pr.product_name separator',') as product_name, 
     group_concat(pi.image separator',') as image,
@@ -139,6 +140,7 @@ module.exports = {
         item.price_sell = item.price_sell.split(',')
         item.product_stock = item.product_stock.split(',')
         item.image = item.image.split(',')
+        item.category_id = item.category_id.split(',')
       });
 
       let tempRes = [...result]
@@ -151,7 +153,8 @@ module.exports = {
             price_modal: result[i].price_modal[j],
             price_sell: result[i].price_sell[j],
             product_stock: result[i].product_stock[j],
-            image: result[i].image[j]
+            image: result[i].image[j],
+            category_id: result[i].category_id[j]
 
            })
         }
@@ -161,6 +164,7 @@ module.exports = {
         delete tempRes[i].price_sell
         delete tempRes[i].product_stock
         delete tempRes[i].image
+        delete tempRes[i].category_id
       }
       
       res.status(200).send(tempRes);

@@ -19,7 +19,7 @@ module.exports = {
         if (req.file === undefined) return res.status(400).send('no image.')
 
         try {
-            const img = `UPDATE profile SET picture = 'images/${req.file.filename}' WHERE user_id = ${id}`
+            const img = `UPDATE profile SET picture = 'profile/${req.file.filename}' WHERE user_id = ${id}`
             const result = await asyncQuery(img)
 
             res.status(200).send('uploaded')
