@@ -1,3 +1,4 @@
+const { body } = require("express-validator");
 const { asyncQuery, queryCartPkg } = require("../helpers/queryHelp");
 
 // export controller
@@ -183,12 +184,15 @@ module.exports = {
     }
   },
   deletePcs: async (req, res) => {
-    const { order_number, product_id } = req.body
-    console.log('req.body : ', req.body)
-    try {
-      const query = `delete from orders_detail where order_number=${order_number} and product_id=${product_id}`
-      const result = await asyncQuery(query)
+    // const { order_number, product_id } = req.body
+    // console.log('body : ', req.body)
 
+    const { order_number, product_id } = req.params
+    console.log('params ', req.params)
+    try {
+      const query = `delete from orders_detail where order_number=${parseInt(order_number)} and product_id=${parseInt(product_id)}`
+      const result = await asyncQuery(query)
+    
       res.status(200).send(result)
     } catch (err) {
       console.log(err)
