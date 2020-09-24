@@ -173,9 +173,9 @@ module.exports = {
     try {
       const query = `update orders_detail SET product_qty=${qty}, total_modal=${total_modal}, total_sell=${total_sell} 
         WHERE product_id =${product_id} AND order_number = ${order_number}`
-      const res = await asyncQuery(query)
+      const result = await asyncQuery(query)
 
-      res.status(200).send(res)
+      res.status(200).send(result)
 
     } catch (err) {
       console.log(err)
@@ -184,7 +184,7 @@ module.exports = {
   },
   deletePcs: async (req, res) => {
     const { order_number, product_id } = req.body
-    console.log(req.body)
+    console.log('req.body : ', req.body)
     try {
       const query = `delete from orders_detail where order_number=${order_number} and product_id=${product_id}`
       const result = await asyncQuery(query)
