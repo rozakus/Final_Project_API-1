@@ -47,13 +47,14 @@ module.exports = {
     },
     approvalPayment: async (req, res) => {
         try {
-            const queryPayment = `update from payment set payment_status_id=2
+            const queryPayment = `update payment set payment_status_id=2
                            where order_number=${parseInt(req.params.on)}`
             const resultPayment = await asyncQuery(queryPayment)
 
-            const queryOrders = `update from orders set status=4 where order_number=${parseInt(req.params.on)}`
+            const queryOrders = `update orders set status=4 where order_number=${parseInt(req.params.on)}`
+            const resultOrders = await asyncQuery(queryOrders)
 
-            res.status(200).send(queryOrders)
+            res.status(200).send(resultOrders)
         } catch(err) {
             console.log(err)
             res.status(500).send(err)
@@ -61,11 +62,11 @@ module.exports = {
     },
     cancelPayment: async (req, res) => {
         try {
-            const queryPayment = `update from payment set payment_status_id=3
+            const queryPayment = `update payment set payment_status_id=3
                            where order_number=${parseInt(req.params.on)}`
             const resultPayment = await asyncQuery(queryPayment)
 
-            const queryOrders = `update from orders set status=5 where order_number=${parseInt(req.params.on)}`
+            const queryOrders = `update orders set status=5 where order_number=${parseInt(req.params.on)}`
             const resultOrders = await asyncQuery(queryOrders)
 
             res.status(200).send(resultOrders)
