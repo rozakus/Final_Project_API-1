@@ -1,3 +1,4 @@
+const { body } = require("express-validator");
 const { asyncQuery, queryCartPkg } = require("../helpers/queryHelp");
 
 // export controller
@@ -5,10 +6,11 @@ module.exports = {
   getCart: async (req, res) => {
     const id = parseInt(req.params.id)
     try {
-      const queryPcs = `select o.order_number, od.product_id, p.product_name, od.product_qty, od.total_sell 
+      const queryPcs = `select o.order_number, od.product_id, p.product_name, p.price_modal, p.price_sell,od.product_qty, od.total_sell, pm.image 
       from orders o
       join orders_detail od on o.order_number=od.order_number
       join products p on od.product_id=p.id_product
+      join product_img pm on od.product_id=pm.product_id
       where od.package_id is null and o.user_id=${id} and o.status=1`
       const resultPcs = await asyncQuery(queryPcs)
 
@@ -21,7 +23,7 @@ module.exports = {
       group by od.package_no`
       const resultPkg = await asyncQuery(queryPkg)
 
-      res.status(200).send({resultPcs, resultPkg})
+      res.status(200).send({ resultPcs, resultPkg })
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
@@ -172,9 +174,9 @@ module.exports = {
     try {
       const query = `update orders_detail SET product_qty=${qty}, total_modal=${total_modal}, total_sell=${total_sell} 
         WHERE product_id =${product_id} AND order_number = ${order_number}`
-      const res = await asyncQuery(query)
+      const result = await asyncQuery(query)
 
-      res.status(200).send(res)
+      res.status(200).send(result)
 
     } catch (err) {
       console.log(err)
@@ -182,25 +184,31 @@ module.exports = {
     }
   },
   deletePcs: async (req, res) => {
-    const { order_number, product_id } = req.body
-    try {
-      const query = `delete from orders_detail where order_number=${order_number} and product_id=${product_id}`
-      const res = await asyncQuery(query)
+    // const { order_number, product_id } = req.body
+    // console.log('body : ', req.body)
 
-      res.status(200).send(res)
+    const { order_number, product_id } = req.params
+    console.log('params ', req.params)
+    try {
+      const query = `delete from orders_detail where order_number=${parseInt(order_number)} and product_id=${parseInt(product_id)}`
+      const result = await asyncQuery(query)
+
+      res.status(200).send(result)
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
     }
   },
   deletePkg: async (req, res) => {
-    const { order_number, package_id, package_no } = req.body
+    // const { order_number, package_id, package_no } = req.body
+    const { order_number, package_id, package_no } = req.params
+    console.log('params : ', req.params)
     try {
       const query = `delete from orders_detail 
-      where order_number=${order_number} and package_id=${package_id} and package_no=${package_no}`
-      const res = await asyncQuery(query)
+      where order_number=${parseInt(order_number)} and package_id=${parseInt(package_id)} and package_no=${parseInt(package_no)}`
+      // const result = await asyncQuery(query)
 
-      res.status(200).send(res)
+      res.status(200).send(query)
     } catch (err) {
       console.log(err)
       res.status(500).send(err)

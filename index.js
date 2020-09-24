@@ -10,6 +10,7 @@ dotenv.config();
 //Setup Middleware
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.static('./public'))
 
 //connect database
 const db = require("./database");
