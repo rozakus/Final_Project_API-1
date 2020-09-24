@@ -81,15 +81,34 @@ module.exports = {
     }
   },
   getAllPackages: async (req, res) => {
-    const query = `SELECT p.id_product_package, p. package_name, p.description, p.img, 
-    pd.category_id, pd.max_qty, 
-      pr.id_product, pr.product_name, pr.price_modal, pr.product_stock, p.package_price
-      FROM package p
-      JOIN package_details pd ON p.id_product_package = pd.package_id
-      LEFT JOIN products pr ON pd.category_id = pr.product_cate`;
+    const query = `SELECT p.id_product_package, p.package_name, p.package_price, p.img, 
+    group_concat(c.category separator ',') as category, 
+    group_concat(pd.max_qty separator ',') as max_qty
+    FROM package p
+    JOIN package_details pd ON p.id_product_package = pd.package_id
+    join categories c on pd.category_id=c.id_category
+    group by p.id_product_package`;
     try {
       const result = await asyncQuery(query);
-      res.status(200).send(result);
+      result.forEach((item, index) => {
+        item.category = item.category.split(',')
+        item.max_qty = item.max_qty.split(',')
+      });
+
+      let tempRes = [...result]
+      for (let i = 0; i < result.length; i++) {
+        tempRes[i].details = []
+        for (let j = 0; j < result[i].category.length; j++) {
+          tempRes[i].details.push({ 
+            category: result[i].category[j], 
+            max_qty: result[i].max_qty[j],
+           })
+        }
+        delete tempRes[i].category
+        delete tempRes[i].max_qty
+      }
+
+      res.status(200).send(tempRes);
     } catch (err) {
       console.log(err);
       res.status(5000).send(err);
@@ -97,31 +116,29 @@ module.exports = {
   },
   getPackageById: async (req, res) => {
     const id = parseInt(req.params.id);
-    // const query = `SELECT p.id_product_package, p. package_name, p.description, p.img,
-    //   pd.category_id, pd.max_qty,
-    //   pr.id_product, pr.product_name, pr.price_modal, pr.product_stock, p.package_price
-    //   FROM package p
-    //   JOIN package_details pd ON p.id_product_package = pd.package_id
-    //   LEFT JOIN products pr ON pd.category_id = pr.product_cate
-    //   WHERE id_product_package = ${id}`;
-    const query = `select p.id_product_package, p. package_name, p.description, p.img, pd.category_id, pd.max_qty, 
-                   group_concat(pr.id_product separator',') as product_id, 
-                   group_concat(pr.product_name separator',') as product_name, 
-                   group_concat(pr.price_modal separator',') as price_modal, 
-                   group_concat(pr.product_stock separator',') as product_stock
-                   from package p
-                   join package_details pd on p.id_product_package=pd.package_id
-                   join categories c on pd.category_id=c.id_category
-                   join products pr on c.id_category=pr.product_cate
-                   where pd.package_id=${id} 
-                   group by pd.category_id`;
+    const query = `select p.id_product_package, p. package_name, p.description, p.img, pd.category_id, c.category, pd.max_qty, 
+    group_concat(pr.id_product separator',') as product_id, 
+    group_concat(pr.product_name separator',') as product_name, 
+    group_concat(pi.image separator',') as image,
+    group_concat(pr.price_modal separator',') as price_modal, 
+    group_concat(pr.price_sell separator',') as price_sell, 
+    group_concat(pr.product_stock separator',') as product_stock
+    from package p
+    join package_details pd on p.id_product_package=pd.package_id
+    join categories c on pd.category_id=c.id_category
+    join products pr on c.id_category=pr.product_cate
+    join product_img pi on pr.id_product=pi.product_id
+    where pd.package_id=${id}
+    group by pd.category_id`;
     try {
       const result = await asyncQuery(query);
       result.forEach((item, index) => {
         item.product_id = item.product_id.split(',')
         item.product_name = item.product_name.split(',')
         item.price_modal = item.price_modal.split(',')
+        item.price_sell = item.price_sell.split(',')
         item.product_stock = item.product_stock.split(',')
+        item.image = item.image.split(',')
       });
 
       let tempRes = [...result]
@@ -132,17 +149,20 @@ module.exports = {
             product_id: result[i].product_id[j], 
             product_name: result[i].product_name[j],
             price_modal: result[i].price_modal[j],
+            price_sell: result[i].price_sell[j],
             product_stock: result[i].product_stock[j],
+            image: result[i].image[j]
 
            })
         }
         delete tempRes[i].product_id
         delete tempRes[i].product_name
         delete tempRes[i].price_modal
+        delete tempRes[i].price_sell
         delete tempRes[i].product_stock
+        delete tempRes[i].image
       }
       
-
       res.status(200).send(tempRes);
     } catch (err) {
       console.log(err);
