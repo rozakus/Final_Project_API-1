@@ -192,7 +192,7 @@ module.exports = {
     try {
       const query = `delete from orders_detail where order_number=${parseInt(order_number)} and product_id=${parseInt(product_id)}`
       const result = await asyncQuery(query)
-    
+
       res.status(200).send(result)
     } catch (err) {
       console.log(err)
@@ -200,13 +200,15 @@ module.exports = {
     }
   },
   deletePkg: async (req, res) => {
-    const { order_number, package_id, package_no } = req.body
+    // const { order_number, package_id, package_no } = req.body
+    const { order_number, package_id, package_no } = req.params
+    console.log('params : ', req.params)
     try {
       const query = `delete from orders_detail 
-      where order_number=${order_number} and package_id=${package_id} and package_no=${package_no}`
-      const res = await asyncQuery(query)
+      where order_number=${parseInt(order_number)} and package_id=${parseInt(package_id)} and package_no=${parseInt(package_no)}`
+      // const result = await asyncQuery(query)
 
-      res.status(200).send(res)
+      res.status(200).send(query)
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
