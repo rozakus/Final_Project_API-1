@@ -206,9 +206,10 @@ module.exports = {
     try {
       const query = `delete from orders_detail 
       where order_number=${parseInt(order_number)} and package_id=${parseInt(package_id)} and package_no=${parseInt(package_no)}`
-      // const result = await asyncQuery(query)
+      const result = await asyncQuery(query)
+      console.log('query : ', query)
 
-      res.status(200).send(query)
+      res.status(200).send(result)
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
