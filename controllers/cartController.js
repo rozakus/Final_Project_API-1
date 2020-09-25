@@ -14,13 +14,13 @@ module.exports = {
       where od.package_id is null and o.user_id=${id} and o.status=1`
       const resultPcs = await asyncQuery(queryPcs)
 
-      const queryPkg = `select o.order_number, od.package_id, p.package_name, od.package_no, group_concat(pr.product_name separator ',') as product_name, od.total_sell 
+      const queryPkg = `select o.order_number, od.package_id, p.package_name, od.package_no, group_concat(pr.product_name separator ',') as product_name, od.total_sell, concat(o.order_number, od.package_id ,od.package_no) as package 
       from orders o
       join orders_detail od on o.order_number=od.order_number
       join products pr on od.product_id=pr.id_product
       join package p on od.package_id=p.id_product_package
-      where od.package_id is not null and o.user_id=${id} and o.status=1
-      group by od.package_no`
+      where od.package_id is not null and o.user_id=2 and o.status=1
+      group by package`
       const resultPkg = await asyncQuery(queryPkg)
 
       res.status(200).send({ resultPcs, resultPkg })
@@ -206,9 +206,10 @@ module.exports = {
     try {
       const query = `delete from orders_detail 
       where order_number=${parseInt(order_number)} and package_id=${parseInt(package_id)} and package_no=${parseInt(package_no)}`
-      // const result = await asyncQuery(query)
+      const result = await asyncQuery(query)
+      console.log('query : ', query)
 
-      res.status(200).send(query)
+      res.status(200).send(result)
     } catch (err) {
       console.log(err)
       res.status(500).send(err)
