@@ -5,6 +5,7 @@ const cartRouter = require('./cartRouter')
 const orderRouter = require('./orderRouter')
 const adminRouter = require('./adminRouter')
 const profileRouter = require('./profileRouter');
+const packageRouter = require('./packageRouter');
 
 module.exports = { 
     userRouter,
@@ -13,5 +14,6 @@ module.exports = {
     cartRouter,
     orderRouter,
     adminRouter,
-    profileRouter
+    profileRouter,
+    packageRouter
  };

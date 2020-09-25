@@ -12,21 +12,21 @@ module.exports = {
       res.status(500).send(error);
     }
   },
-    uploadProfile: async (req, res) => {
-        const id = parseInt(req.params.id)
-        console.log('file : ', req.file)
+  uploadProfile: async (req, res) => {
+    const id = parseInt(req.params.id);
+    console.log("file : ", req.file);
 
-        if (req.file === undefined) return res.status(400).send('no image.')
+    if (req.file === undefined) return res.status(400).send("no image.");
 
-        try {
-            const img = `UPDATE profile SET picture = 'profile/${req.file.filename}' WHERE user_id = ${id}`
-            const result = await asyncQuery(img)
+    try {
+      const img = `UPDATE profile SET picture = 'profile/${req.file.filename}' WHERE user_id = ${id}`;
+      const result = await asyncQuery(img);
 
-            res.status(200).send('uploaded')
-        } catch (err) {
-            console.log(err)
-            res.status(500).send(err)
-        }
+      res.status(200).send("uploaded");
+    } catch (err) {
+      console.log(err);
+      res.status(500).send(err);
+    }
   },
   getProfileByID: async (req, res) => {
     const id = parseInt(req.params.id);

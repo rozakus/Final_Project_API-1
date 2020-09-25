@@ -9,5 +9,12 @@ module.exports = {
     }
     return res.slice(0, -1);
   },
+  queryAddPkg: (packageId, details) => {
+    let res = "";
+    details.forEach((element) => {
+      res += `(${packageId}, ${element.category_id}, ${element.max_qty}),`;
+    });
+    return res.slice(0, -1);
+  },
   asyncQuery: util.promisify(db.query).bind(db),
 };
