@@ -5,6 +5,7 @@ const cartController = require('./cartController')
 const orderController = require('./orderController')
 const adminController = require('./adminController')
 const profileController = require('./profileController');
+const packageController = require('./packageController');
 
 //export all controllers
 module.exports = {
@@ -14,5 +15,6 @@ module.exports = {
     cartController,
     orderController,
     adminController,
-    profileController
+    profileController,
+    packageController
 }
