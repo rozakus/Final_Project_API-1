@@ -9,5 +9,6 @@ const uploadImage = upload(DESTINATION)
 
 router.post('/addNewPackage', packageController.addPackage)
 router.post('/postImgPkg/:id', uploadImage, packageController.addPackage)
+router.patch('package/edit', packageController.editPackage)
 
 module.exports = router
