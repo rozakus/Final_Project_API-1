@@ -199,17 +199,18 @@ module.exports = {
   purchasedHistory: async (req, res) => {
     const id = parseInt(req.params.id)
     try {
-        const query = `SELECT o.order_number, o.user_id, o.status, od.package_id, p.package_name, od.package_no, od.product_id, pr.product_name, od.product_qty, od.total_sell 
-        from orders o
-        join orders_detail od on o.order_number=od.order_number
-        left join package p on od.package_id=p.id_product_package
-        left join products pr on od.product_id=pr.id_product
-        where o.user_id=${id}`
-        const result = await asyncQuery(query)
+      const query = `SELECT p.order_number, p.payment_date, pt.via_bank, p.amount, p.transaction_receipt, os.status AS status_order , ps.status AS status_payment 
+        FROM payment p
+        JOIN payment_status ps ON p.payment_status_id = ps.id_payment_status
+        JOIn payment_type pt ON p.payment_type_id = pt.id_payment_type
+        JOIN orders o ON p.order_number = o.order_number
+        JOIN orders_status os ON o.status = os.id_orders_status
+        where p.users_id=${id}`
+      const result = await asyncQuery(query)
 
-        res.status(200).send(result[0])
-    } catch(err) {
-        res.status(500).send(err)
+      res.status(200).send(result)
+    } catch (err) {
+      res.status(500).send(err)
     }
-}
+  }
 };
