@@ -19,7 +19,7 @@ module.exports = {
       join orders_detail od on o.order_number=od.order_number
       join products pr on od.product_id=pr.id_product
       join package p on od.package_id=p.id_product_package
-      where od.package_id is not null and o.user_id=2 and o.status=1
+      where od.package_id is not null and o.user_id=${id} and o.status=1
       group by package`
       const resultPkg = await asyncQuery(queryPkg)
 

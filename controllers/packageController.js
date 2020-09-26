@@ -6,15 +6,15 @@ module.exports = {
         if (req.file === undefined) return res.status(400).send("no image.");
 
         try {
-            const queryPkg = `insert into package (package_name, package_price, description, img) 
-            values ('${package_name}', ${package_price}, '${description}', 'package/${req.file.filename}')`
+            const queryPkg = `insert into package (package_name, package_price, description) 
+            values ('${package_name}', ${package_price}, '${description}')`
             const resultPkg = await asyncQuery(queryPkg)
 
             const queryPkgDetails = `insert into package_details (package_id, category_id, max_qty) 
             values ` + queryAddPkg(resultPkg.insertId, details)
             const resultPkgDetails = await asyncQuery(queryPkgDetails)
 
-            res.status(200).send(resultPkgDetails)
+            res.status(200).send(resultPkgDetails.insertId)
         } catch(err) {
             console.log(err)
             res.status(500).send(err)
