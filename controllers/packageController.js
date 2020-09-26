@@ -3,7 +3,6 @@ const {asyncQuery, queryAddPkg} = require('../helpers/queryHelp')
 module.exports = {
     addPackage: async (req, res) => {
         const {package_name, package_price, description, details} = req.body
-        if (req.file === undefined) return res.status(400).send("no image.");
 
         try {
             const queryPkg = `insert into package (package_name, package_price, description) 
