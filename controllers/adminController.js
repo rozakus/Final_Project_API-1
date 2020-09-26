@@ -50,9 +50,12 @@ module.exports = {
             const queryPayment = `update payment set payment_status_id=2
                            where order_number=${parseInt(req.params.on)}`
             const resultPayment = await asyncQuery(queryPayment)
-
+            console.log(queryPayment)
+            
+            console.log(req.params.on)
             const queryOrders = `update orders set status=4 where order_number=${parseInt(req.params.on)}`
             const resultOrders = await asyncQuery(queryOrders)
+            console.log(queryOrders)
 
             res.status(200).send(resultOrders)
         } catch(err) {
