@@ -27,4 +27,14 @@ module.exports = {
       res.status(500).send(err);
     }
   },
+  paymentMethod: async (req, res) => {
+    try {
+      const query = `SELECT * FROM payment_type`
+      const resultQuery = await asyncQuery(query)
+
+      res.status(200).send(resultQuery)
+    } catch (err) {
+      res.status(400).send(err)
+    }
+  }
 };
