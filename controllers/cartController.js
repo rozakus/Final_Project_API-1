@@ -80,16 +80,31 @@ module.exports = {
         // udah ada product, update
         if ((resultProductDetails[0] = true)) {
           // update qty, total sell, total modal
-          const qtyUpd = pq + product_qty
-          const totModUpd = tm + total_modal;
-          const totSelUpd = ts + total_sell;
+          const qtyTotal = pq + product_qty
 
-          // update product
-          const updateOrderDetail = `UPDATE orders_detail SET product_qty=${qtyUpd}, total_modal=${totModUpd}, total_sell=${totSelUpd} 
+          if (qtyTotal >= 100) {
+            const qtyUpd = 100
+            const totModUpd = tm + total_modal;
+            const totSelUpd = ts + total_sell;
+
+            // update product
+            const updateOrderDetail = `UPDATE orders_detail SET product_qty=${qtyUpd}, total_modal=${totModUpd}, total_sell=${totSelUpd} 
           WHERE product_id =${product_id} AND order_number = ${order_number}`;
-          const resultUpdate = await asyncQuery(updateOrderDetail);
+            const resultUpdate = await asyncQuery(updateOrderDetail);
 
-          return res.status(200).send("sukses brok");
+            return res.status(200).send("sukses brok");
+          } else {
+            const qtyUpd = qtyTotal
+            const totModUpd = tm + total_modal;
+            const totSelUpd = ts + total_sell;
+
+            // update product
+            const updateOrderDetail = `UPDATE orders_detail SET product_qty=${qtyUpd}, total_modal=${totModUpd}, total_sell=${totSelUpd} 
+            WHERE product_id =${product_id} AND order_number = ${order_number}`;
+            const resultUpdate = await asyncQuery(updateOrderDetail);
+
+            return res.status(200).send("sukses brok");
+          }
         }
       }
     } catch (err) {
