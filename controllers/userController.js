@@ -68,13 +68,13 @@ module.exports = {
       const option = {
         from: `admin <frengky.sihombing.777@gmail.com>`,
         to: `${email}`,
-        subject: "PurwaHampers Verification",
+        subject: "FAR Hampers Verification",
         text: `Hello our precious customers, ${username}!
         
         Click link below to verified your account
         
         Your hamper's best provider,
-        PurwaHampers.`,
+        FAR Hampers.`,
         html: `
             <a href ="http://127.0.0.2:2000/verification/${token}">http://127.0.0.2:2000/verification/${token}</a>`,
       };
