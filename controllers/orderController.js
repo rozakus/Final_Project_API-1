@@ -65,5 +65,23 @@ module.exports = {
     } catch (err) {
       res.status(400).send(err)
     }
+  },
+  reduceStock: async (req, res) => {
+    const { order_number } = req.body
+    console.log(req.body)
+    try {
+      const paidOderNumber = `SELECT od.product_id, od.product_qty
+      FROM orders o
+      JOIN orders_detail od ON o.order_number = od.order_number
+      WHERE o.order_number = ${order_number} AND o.status = 4`
+      const resultPaid = await asyncQuery(paidOderNumber)
+      
+      const query = `SELECT * FROM payment_type`
+      // const resultQuery = await asyncQuery(query)
+
+      res.status(200).send(resultPaid)
+    } catch (err) {
+      res.status(400).send(err)
+    }
   }
 };
