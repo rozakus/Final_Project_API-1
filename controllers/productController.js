@@ -116,7 +116,7 @@ module.exports = {
   },
   getPackageById: async (req, res) => {
     const id = parseInt(req.params.id);
-    const query = `select p.id_product_package, p. package_name, p.description, p.img, p.package_price, c.category, pd.max_qty, 
+    const query = `select p.id_product_package, p. package_name, p.description, p.img, p.package_price, c.id_category, c.category, pd.max_qty, 
     group_concat(pd.category_id separator',') as category_id, 
     group_concat(pr.id_product separator',') as product_id, 
     group_concat(pr.product_name separator',') as product_name, 
@@ -148,7 +148,7 @@ module.exports = {
         tempRes[i].product = []
         for (let j = 0; j < result[i].product_id.length; j++) {
           tempRes[i].product.push({ 
-            product_id: result[i].product_id[j], 
+            product_id: parseInt(result[i].product_id[j]), 
             product_name: result[i].product_name[j],
             price_modal: result[i].price_modal[j],
             price_sell: result[i].price_sell[j],
