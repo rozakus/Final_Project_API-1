@@ -68,13 +68,13 @@ module.exports = {
       const option = {
         from: `admin <frengky.sihombing.777@gmail.com>`,
         to: `${email}`,
-        subject: "PurwaHampers Verification",
+        subject: "FAR Hampers Verification",
         text: `Hello our precious customers, ${username}!
         
         Click link below to verified your account
         
         Your hamper's best provider,
-        PurwaHampers.`,
+        FAR Hampers.`,
         html: `
             <a href ="http://127.0.0.2:2000/verification/${token}">http://127.0.0.2:2000/verification/${token}</a>`,
       };
@@ -175,7 +175,7 @@ module.exports = {
     //check new password requirement
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).send(errors.array()[0].msg);
-
+    
     try {
       const queryCheckPass = `select * from users where id_users=${id}`
       const check = await asyncQuery(queryCheckPass)
