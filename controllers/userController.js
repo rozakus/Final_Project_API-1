@@ -175,7 +175,7 @@ module.exports = {
     //check new password requirement
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).send(errors.array()[0].msg);
-
+    
     try {
       const queryCheckPass = `select * from users where id_users=${id}`
       const check = await asyncQuery(queryCheckPass)
