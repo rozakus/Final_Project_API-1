@@ -81,19 +81,23 @@ module.exports = {
         if ((resultProductDetails[0] = true)) {
           // update qty, total sell, total modal
           const qtyTotal = pq + product_qty
+          const getProduct = `SELECT * FROM products WHERE id_product = ${product_id}`
+          const resultGetProduct = await asyncQuery(getProduct)
 
-          if (qtyTotal >= 100) {
-            const qtyUpd = 100
-            const totModUpd = tm + total_modal;
-            const totSelUpd = ts + total_sell;
+          if (qtyTotal >= resultGetProduct[0].product_stock) {
+            const qtyUpd = resultGetProduct[0].product_stock
+            const totModUpd = resultGetProduct[0].product_stock * resultGetProduct[0].price_modal;
+            const totSelUpd = resultGetProduct[0].product_stock * resultGetProduct[0].price_sell;
 
             // update product
             const updateOrderDetail = `UPDATE orders_detail SET product_qty=${qtyUpd}, total_modal=${totModUpd}, total_sell=${totSelUpd} 
-          WHERE product_id =${product_id} AND order_number = ${order_number}`;
+            WHERE product_id =${product_id} AND order_number = ${order_number}`;
             const resultUpdate = await asyncQuery(updateOrderDetail);
 
             return res.status(200).send("sukses brok");
-          } else {
+          }
+
+          if (qtyTotal < resultGetProduct[0].product_stock) {
             const qtyUpd = qtyTotal
             const totModUpd = tm + total_modal;
             const totSelUpd = ts + total_sell;
