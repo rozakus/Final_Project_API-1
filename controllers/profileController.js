@@ -31,7 +31,7 @@ module.exports = {
   getProfileByID: async (req, res) => {
     const id = parseInt(req.params.id);
     try {
-      const queryGetProfileByID = `SELECT * FROM profile WHERE id_profile = ${id}`;
+      const queryGetProfileByID = `SELECT * FROM profile WHERE user_id = ${id}`;
       const resultGetProfileByID = await asyncQuery(queryGetProfileByID);
 
       res.status(200).send(resultGetProfileByID[0]);
