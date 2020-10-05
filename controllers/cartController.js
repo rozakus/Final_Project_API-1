@@ -6,7 +6,7 @@ module.exports = {
   getCart: async (req, res) => {
     const id = parseInt(req.params.id)
     try {
-      const queryPcs = `select o.order_number, od.product_id, p.product_name, p.price_modal, p.price_sell,od.product_qty, od.total_sell, pm.image 
+      const queryPcs = `select o.order_number, od.product_id, p.product_name, p.price_modal, p.price_sell, p.product_stock, od.product_qty, od.total_sell, pm.image 
       from orders o
       join orders_detail od on o.order_number=od.order_number
       join products p on od.product_id=p.id_product

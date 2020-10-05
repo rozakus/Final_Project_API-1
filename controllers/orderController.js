@@ -75,9 +75,34 @@ module.exports = {
       JOIN orders_detail od ON o.order_number = od.order_number
       WHERE o.order_number = ${order_number} AND o.status = 4`
       const resultPaid = await asyncQuery(paidOderNumber)
-      
-      const query = `SELECT * FROM payment_type`
-      // const resultQuery = await asyncQuery(query)
+
+      const queryReduce1 = `
+      UPDATE products SET product_stock = 80 WHERE id_product = 2
+      UPDATE products SET product_stock = 90 WHERE id_product = 3`
+
+      const queryReduce2 = `
+      UPDATE students s
+      JOIN (
+        SELECT 1 as id, 5 as new_score1, 8 as new_score2
+        UNION ALL
+        SELECT 2, 10, 8
+        UNION ALL
+        SELECT 3, 8, 3
+        UNION ALL
+        SELECT 4, 10, 7
+        ) vals ON s.id = vals.id
+      SET score1 = new_score1, score2 = new_score2`
+
+      const queryReduce3 = `
+      INSERT INTO students (id, score1, score2)
+      VALUES 
+        (1, 5, 8),
+        (2, 10, 8),
+        (3, 8, 3),
+        (4, 10, 7)
+      ON DUPLICATE KEY UPDATE 
+        score1 = VALUES(score1),
+        score2 = VALUES(score2)`
 
       res.status(200).send(resultPaid)
     } catch (err) {
