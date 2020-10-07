@@ -8,7 +8,7 @@ const transporter = require("../helpers/nodemailer");
 module.exports = {
   getUserData: async (req, res) => {
     const getAllUsers =
-      "SELECT * FROM users u join profile p on u.id_users = p.user_id";
+      `SELECT * FROM users u join profile p on u.id_users = p.user_id where u.role = "user"`;
     try {
       const resultDataUsers = await asyncQuery(getAllUsers);
       res.status(200).send(resultDataUsers);
