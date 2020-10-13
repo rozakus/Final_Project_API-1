@@ -11,5 +11,6 @@ router.patch('/restock', adminController.reStock)
 router.get('/totalSalesReport', adminController.TotalSalesReport)
 router.get('/highestProfit', adminController.highestProfit)
 router.get('/highestPkgSold', adminController.highestPkgSold)
+router.patch('/reduceStock/:on', adminController.reduceStock)
 
 module.exports = router

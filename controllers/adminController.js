@@ -1,4 +1,4 @@
-const {asyncQuery} = require('../helpers/queryHelp')
+const { asyncQuery } = require('../helpers/queryHelp')
 
 module.exports = {
     salesReport: async (req, res) => {
@@ -12,13 +12,13 @@ module.exports = {
             where o.status = 4
             group by o.order_number`
             const result = await asyncQuery(query)
-            
+
             result.forEach(element => {
                 element.profit = element.total_sell - element.total_modal
             });
 
             res.status(200).send(result)
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
@@ -40,7 +40,7 @@ module.exports = {
             });
 
             res.status(200).send(result)
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
@@ -51,14 +51,14 @@ module.exports = {
                            where order_number=${parseInt(req.params.on)}`
             const resultPayment = await asyncQuery(queryPayment)
             console.log(queryPayment)
-            
+
             console.log(req.params.on)
             const queryOrders = `update orders set status=4 where order_number=${parseInt(req.params.on)}`
             const resultOrders = await asyncQuery(queryOrders)
             console.log(queryOrders)
 
             res.status(200).send(resultOrders)
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
@@ -73,7 +73,7 @@ module.exports = {
             const resultOrders = await asyncQuery(queryOrders)
 
             res.status(200).send(resultOrders)
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
@@ -87,20 +87,20 @@ module.exports = {
             const result = await asyncQuery(query)
 
             res.status(200).send(result)
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
     },
     reStock: async (req, res) => {
-        const {restock, id_product} = req.body
+        const { restock, id_product } = req.body
         try {
             const query = `update from products set product_stock=${restock}
                            where id_product=${id_product}`
             const result = await asyncQuery(query)
 
             res.status(200).send(result)
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
@@ -117,15 +117,15 @@ module.exports = {
             group by o.order_number`
             const result = await asyncQuery(query)
             let totalProfit = []
-            
+
             result.forEach(element => {
                 element.profit = element.total_sell - element.total_modal
                 totalProfit.push(element.profit)
             });
-            const total = totalProfit.reduce((a,b) => a+b)
+            const total = totalProfit.reduce((a, b) => a + b)
 
-            res.status(200).send({total_profit: total})
-        } catch(err) {
+            res.status(200).send({ total_profit: total })
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
@@ -142,7 +142,7 @@ module.exports = {
             group by o.order_number`
             const result = await asyncQuery(query)
             let totalProfit = []
-            
+
             result.forEach(element => {
                 element.profit = element.total_sell - element.total_modal
                 totalProfit.push(element.profit)
@@ -151,8 +151,8 @@ module.exports = {
             const id = result.findIndex(item => item.profit == highest)
             const username = result[id].username
 
-            res.status(200).send({username: username, highest_profit: highest})
-        } catch(err) {
+            res.status(200).send({ username: username, highest_profit: highest })
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
@@ -164,7 +164,7 @@ module.exports = {
             group by package_id`
             const result = await asyncQuery(query)
             let qty = []
-            
+
             result.forEach(element => {
                 qty.push(element.total)
             });
@@ -172,9 +172,25 @@ module.exports = {
             const id = result.findIndex(item => item.total == highest)
 
             res.status(200).send(result[id])
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             res.status(500).send(err)
         }
     },
+    reduceStock: async (req, res) => {
+        const { on } = req.params
+        console.log('params : ', req.params)
+        try {
+            const paidOderNumber = `UPDATE products
+            INNER JOIN orders_detail ON products.id_product = orders_detail.product_id
+            INNER JOIN orders ON orders_detail.order_number = orders.order_number
+            SET product_stock = product_stock - product_qty
+            WHERE orders.order_number = ${parseInt(on)} AND orders.status = 4`
+            const resultPaid = await asyncQuery(paidOderNumber)
+
+            res.status(200).send(resultPaid)
+        } catch (err) {
+            res.status(400).send(err)
+        }
+    }
 }
